@@ -32,7 +32,18 @@ public class Lutador {
     boolean defendendo;      // esta de guarda levantada?
     boolean guardaAberta;    // deu um chute ou provocou e ficou exposto?
 
-    Cores cor;            // objeto com os codigos de cor do terminal
+    // codigos de cor do terminal, usados nas barras de vida e de furia.
+    // o terminal pinta o texto quando recebe o caractere numero 27
+    // (que tem o nome de "escape") seguido de um codigo.
+    String escape;
+    String reset;      // volta o texto para a cor normal
+    String negrito;
+    String vermelho;
+    String amarelo;
+    String verde;
+    String azul;
+    String roxo;
+    String cinza;
 
     // ===================== CONSTRUTOR =====================
     // E aqui que o lutador "nasce". Quem cria escolhe o nome, o pais, o estilo,
@@ -60,7 +71,16 @@ public class Lutador {
         this.maiorGolpe = 0;
         this.defendendo = false;
         this.guardaAberta = false;
-        this.cor = new Cores();
+
+        this.escape   = "" + (char) 27;
+        this.reset    = this.escape + "[0m";
+        this.negrito  = this.escape + "[1m";
+        this.vermelho = this.escape + "[91m";
+        this.amarelo  = this.escape + "[93m";
+        this.verde    = this.escape + "[92m";
+        this.azul     = this.escape + "[96m";
+        this.roxo     = this.escape + "[95m";
+        this.cinza    = this.escape + "[90m";
     }
 
     // ===================== METODOS DE APOIO =====================
@@ -230,34 +250,34 @@ public class Lutador {
 
     // Mostra o lutador em uma linha so, para aparecer na lista de escolha.
     void mostrarNaLista(int numero) {
-        System.out.println("  " + cor.amarelo + "[" + numero + "]" + cor.reset + "  "
-            + cor.negrito + completar(this.nome, 11) + cor.reset
+        System.out.println("  " + amarelo + "[" + numero + "]" + reset + "  "
+            + negrito + completar(this.nome, 11) + reset
             + completar(this.pais, 10)
             + completar("" + this.danoDoSoco, 6)
             + completar("" + this.danoDoChute, 7)
             + completar("" + this.danoDoEspecial, 6)
             + completar("" + this.defesa, 6)
             + completar("" + this.velocidade, 6)
-            + cor.cinza + this.especial + cor.reset);
+            + cinza + this.especial + reset);
     }
 
     // Mostra a linha do lutador no placar: nome, barra de vida e barra de furia.
     void mostrarBarras() {
         System.out.println("  "
-            + cor.negrito + completar(this.nome.toUpperCase(), 11) + cor.reset
+            + negrito + completar(this.nome.toUpperCase(), 11) + reset
             + "[" + barra(this.vida, this.vidaMaxima, 20, corDaVida(), "#", "-") + "]"
             + " " + completarNaFrente("" + this.vida, 3)
-            + cor.cinza + "  FURIA " + cor.reset
+            + cinza + "  FURIA " + reset
             + "[" + barra(this.furia, 100, 10, corDaFuria(), "=", ".") + "]  "
             + marcaDosRounds());
     }
 
     // Mostra as estatisticas do lutador no fim da luta.
     void mostrarEstatisticas() {
-        System.out.println("  " + cor.negrito + completar(this.nome.toUpperCase(), 13) + cor.reset
-            + cor.cinza + "dano total " + cor.reset + completar("" + this.danoCausado, 6)
-            + cor.cinza + "golpes certos " + cor.reset + completar("" + this.golpesAcertados, 5)
-            + cor.cinza + "maior golpe " + cor.reset + this.maiorGolpe);
+        System.out.println("  " + negrito + completar(this.nome.toUpperCase(), 13) + reset
+            + cinza + "dano total " + reset + completar("" + this.danoCausado, 6)
+            + cinza + "golpes certos " + reset + completar("" + this.golpesAcertados, 5)
+            + cinza + "maior golpe " + reset + this.maiorGolpe);
     }
 
     // Monta uma barra: primeiro a parte cheia, depois a parte vazia.
@@ -272,33 +292,33 @@ public class Lutador {
             quantidadeCheia = blocos;
         }
 
-        return corCheia + repetir(cheio, quantidadeCheia) + cor.reset
-             + cor.cinza + repetir(vazio, blocos - quantidadeCheia) + cor.reset;
+        return corCheia + repetir(cheio, quantidadeCheia) + reset
+             + cinza + repetir(vazio, blocos - quantidadeCheia) + reset;
     }
 
     // A barra de vida muda de cor conforme o lutador vai apanhando.
     String corDaVida() {
         if (this.vida > 60) {
-            return cor.verde;
+            return verde;
         } else if (this.vida > 30) {
-            return cor.amarelo;
+            return amarelo;
         } else {
-            return cor.vermelho;
+            return vermelho;
         }
     }
 
     String corDaFuria() {
         if (this.furia >= 100) {
-            return cor.roxo;      // furia cheia, o especial esta liberado
+            return roxo;      // furia cheia, o especial esta liberado
         } else {
-            return cor.azul;
+            return azul;
         }
     }
 
     // Mostra os rounds ja vencidos: * e round ganho, - e round que falta.
     String marcaDosRounds() {
-        return cor.amarelo + repetir("* ", this.roundsVencidos)
-             + cor.cinza + repetir("- ", 2 - this.roundsVencidos) + cor.reset;
+        return amarelo + repetir("* ", this.roundsVencidos)
+             + cinza + repetir("- ", 2 - this.roundsVencidos) + reset;
     }
 
     // ===================== FERRAMENTAS DE TEXTO =====================

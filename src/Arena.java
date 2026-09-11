@@ -13,9 +13,21 @@ public class Arena {
     int turno;
 
     Scanner teclado;
-    Cores cor;
     String linhaDupla;              // a linha de ==== do placar
     String linhaSimples;            // a linha de ---- das molduras
+
+    // codigos de cor do terminal. o terminal pinta o texto quando recebe o
+    // caractere numero 27 (que tem o nome de "escape") seguido de um codigo.
+    String escape;
+    String reset;      // volta o texto para a cor normal
+    String negrito;
+    String vermelho;
+    String amarelo;
+    String verde;
+    String azul;
+    String roxo;
+    String cinza;
+    String branco;
 
     // ===================== CONSTRUTOR =====================
     public Arena(Lutador lutador1, Lutador lutador2, boolean lutador2EhComputador, Scanner teclado) {
@@ -26,9 +38,19 @@ public class Arena {
 
         this.round = 1;
         this.turno = 1;
-        this.cor = new Cores();
         this.linhaDupla = repetir("=", 62);
         this.linhaSimples = repetir("-", 62);
+
+        this.escape   = "" + (char) 27;
+        this.reset    = this.escape + "[0m";
+        this.negrito  = this.escape + "[1m";
+        this.vermelho = this.escape + "[91m";
+        this.amarelo  = this.escape + "[93m";
+        this.verde    = this.escape + "[92m";
+        this.azul     = this.escape + "[96m";
+        this.roxo     = this.escape + "[95m";
+        this.cinza    = this.escape + "[90m";
+        this.branco   = this.escape + "[97m";
     }
 
     // ===================== A LUTA INTEIRA =====================
@@ -141,7 +163,7 @@ public class Arena {
 
         } else {
             // o golpe especial tem uma entrada mais caprichada
-            caixa(atacante.nome.toUpperCase() + " USOU " + atacante.especial, cor.roxo);
+            caixa(atacante.nome.toUpperCase() + " USOU " + atacante.especial, roxo);
             pausa(900);
             atacante.golpeEspecial(defensor);
         }
@@ -188,13 +210,13 @@ public class Arena {
         voltarAoTopo();
 
         System.out.println();
-        System.out.println(cor.cinza + "  " + linhaDupla + cor.reset);
-        System.out.println("  " + cor.negrito + "ROUND " + round + cor.reset
-            + cor.cinza + completar("   turno " + turno + "   melhor de 3 rounds", 50) + cor.reset);
-        System.out.println(cor.cinza + "  " + linhaDupla + cor.reset);
+        System.out.println(cinza + "  " + linhaDupla + reset);
+        System.out.println("  " + negrito + "ROUND " + round + reset
+            + cinza + completar("   turno " + turno + "   melhor de 3 rounds", 50) + reset);
+        System.out.println(cinza + "  " + linhaDupla + reset);
         lutador1.mostrarBarras();
         lutador2.mostrarBarras();
-        System.out.println(cor.cinza + "  " + linhaDupla + cor.reset);
+        System.out.println(cinza + "  " + linhaDupla + reset);
     }
 
     // Desenha o placar e apaga tudo o que estiver embaixo dele.
@@ -225,11 +247,11 @@ public class Arena {
     void mostrarVersus() {
         limparTela();
         System.out.println();
-        caixa(lutador1.nome.toUpperCase() + "  contra  " + lutador2.nome.toUpperCase(), cor.amarelo);
+        caixa(lutador1.nome.toUpperCase() + "  contra  " + lutador2.nome.toUpperCase(), amarelo);
         System.out.println();
-        mostrarResumo(lutador1, cor.azul);
+        mostrarResumo(lutador1, azul);
         System.out.println();
-        mostrarResumo(lutador2, cor.vermelho);
+        mostrarResumo(lutador2, vermelho);
         System.out.println();
 
         // quem for mais rapido comeca o round
@@ -242,40 +264,40 @@ public class Arena {
 
     // Resumo curto de um lutador, usado na tela de apresentacao da luta.
     void mostrarResumo(Lutador lutador, String corDoLado) {
-        System.out.println("  " + corDoLado + cor.negrito + completar(lutador.nome.toUpperCase(), 14) + cor.reset
-            + cor.cinza + lutador.pais + " - " + lutador.estilo + " - " + lutador.especial + cor.reset);
-        System.out.println("  " + cor.cinza + "soco " + lutador.danoDoSoco
+        System.out.println("  " + corDoLado + negrito + completar(lutador.nome.toUpperCase(), 14) + reset
+            + cinza + lutador.pais + " - " + lutador.estilo + " - " + lutador.especial + reset);
+        System.out.println("  " + cinza + "soco " + lutador.danoDoSoco
             + "   chute " + lutador.danoDoChute
             + "   especial " + lutador.danoDoEspecial
             + "   defesa " + lutador.defesa
-            + "   velocidade " + lutador.velocidade + cor.reset);
+            + "   velocidade " + lutador.velocidade + reset);
     }
 
     void mostrarAnuncioDeRound() {
         limparTela();
         System.out.println();
         System.out.println();
-        caixa("R O U N D   " + round, cor.branco);
+        caixa("R O U N D   " + round, branco);
         pausa(800);
         System.out.println();
-        caixa("L U T E M !", cor.vermelho);
+        caixa("L U T E M !", vermelho);
         pausa(900);
     }
 
     void mostrarMenuDeAcoes(Lutador lutador) {
-        System.out.println("  " + cor.negrito + lutador.nome.toUpperCase() + cor.reset + ", escolha o que fazer:");
-        System.out.println("   " + cor.amarelo + "[1]" + cor.reset + " Soco      " + cor.cinza + "tira " + lutador.danoDoSoco + " e mantem a guarda" + cor.reset);
-        System.out.println("   " + cor.amarelo + "[2]" + cor.reset + " Chute     " + cor.cinza + "tira " + lutador.danoDoChute + ", mas abre a guarda" + cor.reset);
-        System.out.println("   " + cor.amarelo + "[3]" + cor.reset + " Defender  " + cor.cinza + "corta pela metade o dano do proximo golpe" + cor.reset);
-        System.out.println("   " + cor.amarelo + "[4]" + cor.reset + " Provocar  " + cor.cinza + "enche muito a furia, mas abre a guarda" + cor.reset);
+        System.out.println("  " + negrito + lutador.nome.toUpperCase() + reset + ", escolha o que fazer:");
+        System.out.println("   " + amarelo + "[1]" + reset + " Soco      " + cinza + "tira " + lutador.danoDoSoco + " e mantem a guarda" + reset);
+        System.out.println("   " + amarelo + "[2]" + reset + " Chute     " + cinza + "tira " + lutador.danoDoChute + ", mas abre a guarda" + reset);
+        System.out.println("   " + amarelo + "[3]" + reset + " Defender  " + cinza + "corta pela metade o dano do proximo golpe" + reset);
+        System.out.println("   " + amarelo + "[4]" + reset + " Provocar  " + cinza + "enche muito a furia, mas abre a guarda" + reset);
 
         // o especial so aparece liberado quando a furia chega em 100
         if (lutador.furia >= 100) {
-            System.out.println("   " + cor.amarelo + "[5]" + cor.reset + " Especial  "
-                + cor.verde + "PRONTO - " + lutador.especial + " tira " + lutador.danoDoEspecial + cor.reset);
+            System.out.println("   " + amarelo + "[5]" + reset + " Especial  "
+                + verde + "PRONTO - " + lutador.especial + " tira " + lutador.danoDoEspecial + reset);
         } else {
-            System.out.println("   " + cor.amarelo + "[5]" + cor.reset + " Especial  "
-                + cor.cinza + "precisa de 100 de furia (voce tem " + lutador.furia + ")" + cor.reset);
+            System.out.println("   " + amarelo + "[5]" + reset + " Especial  "
+                + cinza + "precisa de 100 de furia (voce tem " + lutador.furia + ")" + reset);
         }
     }
 
@@ -292,9 +314,9 @@ public class Arena {
         vencedor.vencerRound();
         mostrarPlacarLimpo();
 
-        caixa("K . O .", cor.vermelho);
+        caixa("K . O .", vermelho);
         System.out.println();
-        System.out.println("  " + cor.negrito + vencedor.nome.toUpperCase() + cor.reset
+        System.out.println("  " + negrito + vencedor.nome.toUpperCase() + reset
             + " derrubou " + perdedor.nome.toUpperCase() + " e venceu o round.");
         System.out.println("  Placar da luta: " + lutador1.nome + " " + lutador1.roundsVencidos
             + "  x  " + lutador2.roundsVencidos + " " + lutador2.nome);
@@ -313,16 +335,16 @@ public class Arena {
 
         limparTela();
         System.out.println();
-        caixa("V E N C E D O R :  " + vencedor.nome.toUpperCase(), cor.amarelo);
+        caixa("V E N C E D O R :  " + vencedor.nome.toUpperCase(), amarelo);
         System.out.println();
-        System.out.println("  " + cor.negrito + vencedor.nome.toUpperCase() + cor.reset
+        System.out.println("  " + negrito + vencedor.nome.toUpperCase() + reset
             + " venceu a luta por " + vencedor.roundsVencidos + " a " + perdedor.roundsVencidos + ".");
         System.out.println();
-        System.out.println("  " + cor.negrito + "ESTATISTICAS DA LUTA" + cor.reset);
-        System.out.println(cor.cinza + "  " + linhaSimples + cor.reset);
+        System.out.println("  " + negrito + "ESTATISTICAS DA LUTA" + reset);
+        System.out.println(cinza + "  " + linhaSimples + reset);
         lutador1.mostrarEstatisticas();
         lutador2.mostrarEstatisticas();
-        System.out.println(cor.cinza + "  " + linhaSimples + cor.reset);
+        System.out.println(cinza + "  " + linhaSimples + reset);
 
         System.out.println();
         System.out.println("  Digite 1 para voltar ao menu.");
@@ -331,10 +353,10 @@ public class Arena {
 
     // Moldura usada nos momentos importantes: ROUND, LUTEM, K.O., VENCEDOR.
     void caixa(String texto, String corDaCaixa) {
-        System.out.println(corDaCaixa + "  +" + linhaSimples + "+" + cor.reset);
-        System.out.println(corDaCaixa + "  |" + cor.negrito + completar("  " + texto, 62) + cor.reset
-            + corDaCaixa + "|" + cor.reset);
-        System.out.println(corDaCaixa + "  +" + linhaSimples + "+" + cor.reset);
+        System.out.println(corDaCaixa + "  +" + linhaSimples + "+" + reset);
+        System.out.println(corDaCaixa + "  |" + negrito + completar("  " + texto, 62) + reset
+            + corDaCaixa + "|" + reset);
+        System.out.println(corDaCaixa + "  +" + linhaSimples + "+" + reset);
     }
 
     // ===================== FERRAMENTAS =====================
@@ -342,12 +364,12 @@ public class Arena {
     // Manda o cursor para o canto de cima da tela, para desenhar por cima
     // do que ja estava la. E isso que faz a animacao nao ficar piscando.
     void voltarAoTopo() {
-        System.out.print(cor.escape + "[H");
+        System.out.print(escape + "[H");
     }
 
     // Apaga tudo o que estiver abaixo do cursor.
     void apagarORestante() {
-        System.out.print(cor.escape + "[J");
+        System.out.print(escape + "[J");
     }
 
     void limparTela() {

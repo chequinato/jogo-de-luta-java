@@ -5,26 +5,49 @@ import java.util.Scanner;
 public class Jogo {
 
     // ===================== ATRIBUTOS =====================
-    Lutador[] lutadores;    // todos os lutadores do jogo guardados juntos
+    // os seis lutadores do jogo, cada um na sua variavel, do mesmo jeito
+    // que a gente criou o snorlax, o pikachu e o blastoise na aula
+    Lutador ryu;
+    Lutador ken;
+    Lutador chunLi;
+    Lutador blanka;
+    Lutador zangief;
+    Lutador dhalsim;
+
+    int quantidadeDeLutadores;
+
     Scanner teclado;
-    Cores cor;
+
+    // codigos de cor do terminal. o terminal pinta o texto quando recebe o
+    // caractere numero 27 (que tem o nome de "escape") seguido de um codigo.
+    String escape;
+    String reset;      // volta o texto para a cor normal
+    String negrito;
+    String vermelho;
+    String amarelo;
+    String cinza;
 
     // ===================== CONSTRUTOR =====================
     // E aqui que os 6 lutadores sao criados, cada um com o dano dos seus
-    // golpes ja definido. Para colocar mais um, e so aumentar o numero do
-    // new Lutador[6] e acrescentar outra linha.
+    // golpes ja definido.
     public Jogo() {
         this.teclado = new Scanner(System.in);
-        this.cor = new Cores();
+        this.quantidadeDeLutadores = 6;
 
-        this.lutadores = new Lutador[6];
-        //                             nome       pais      estilo        especial              soco chute esp def vel
-        this.lutadores[0] = new Lutador("Ryu",     "Japao",  "Karate",     "HADOUKEN",             14,  22,  45,  5,  6);
-        this.lutadores[1] = new Lutador("Ken",     "EUA",    "Karate",     "SHORYUKEN",            16,  24,  48,  4,  7);
-        this.lutadores[2] = new Lutador("Chun-Li", "China",  "Kung Fu",    "SPINNING BIRD KICK",   13,  20,  42,  4,  9);
-        this.lutadores[3] = new Lutador("Blanka",  "Brasil", "Selvagem",   "ELECTRIC THUNDER",     17,  26,  50,  3,  6);
-        this.lutadores[4] = new Lutador("Zangief", "Russia", "Luta Livre", "SPINNING PILEDRIVER",  19,  30,  55,  7,  2);
-        this.lutadores[5] = new Lutador("Dhalsim", "India",  "Yoga",       "YOGA FLAME",           14,  23,  46,  3,  8);
+        //                    nome       pais      estilo        especial              soco chute esp def vel
+        this.ryu     = new Lutador("Ryu",     "Japao",  "Karate",     "HADOUKEN",             14,  22,  45,  5,  6);
+        this.ken     = new Lutador("Ken",     "EUA",    "Karate",     "SHORYUKEN",            16,  24,  48,  4,  7);
+        this.chunLi  = new Lutador("Chun-Li", "China",  "Kung Fu",    "SPINNING BIRD KICK",   13,  20,  42,  4,  9);
+        this.blanka  = new Lutador("Blanka",  "Brasil", "Selvagem",   "ELECTRIC THUNDER",     17,  26,  50,  3,  6);
+        this.zangief = new Lutador("Zangief", "Russia", "Luta Livre", "SPINNING PILEDRIVER",  19,  30,  55,  7,  2);
+        this.dhalsim = new Lutador("Dhalsim", "India",  "Yoga",       "YOGA FLAME",           14,  23,  46,  3,  8);
+
+        this.escape   = "" + (char) 27;
+        this.reset    = this.escape + "[0m";
+        this.negrito  = this.escape + "[1m";
+        this.vermelho = this.escape + "[91m";
+        this.amarelo  = this.escape + "[93m";
+        this.cinza    = this.escape + "[90m";
     }
 
     // ===================== O MENU =====================
@@ -39,10 +62,10 @@ public class Jogo {
 
             System.out.println("  MENU PRINCIPAL");
             System.out.println("  --------------------------------------------------");
-            System.out.println("   " + cor.amarelo + "[1]" + cor.reset + " Jogador contra o computador");
-            System.out.println("   " + cor.amarelo + "[2]" + cor.reset + " Jogador contra jogador");
-            System.out.println("   " + cor.amarelo + "[3]" + cor.reset + " Ver a ficha de um lutador");
-            System.out.println("   " + cor.amarelo + "[4]" + cor.reset + " Sair do jogo");
+            System.out.println("   " + amarelo + "[1]" + reset + " Jogador contra o computador");
+            System.out.println("   " + amarelo + "[2]" + reset + " Jogador contra jogador");
+            System.out.println("   " + amarelo + "[3]" + reset + " Ver a ficha de um lutador");
+            System.out.println("   " + amarelo + "[4]" + reset + " Sair do jogo");
             System.out.println();
 
             int opcao = teclado.nextInt();
@@ -71,12 +94,12 @@ public class Jogo {
         // o computador sempre pega o proximo lutador da lista.
         // se o jogador escolheu o ultimo, o computador volta para o primeiro.
         int numeroDoComputador = numeroDoJogador + 1;
-        if (numeroDoComputador > lutadores.length) {
+        if (numeroDoComputador > quantidadeDeLutadores) {
             numeroDoComputador = 1;
         }
 
-        Lutador jogador = lutadores[numeroDoJogador - 1].criarCopia();
-        Lutador computador = lutadores[numeroDoComputador - 1].criarCopia();
+        Lutador jogador = pegarLutador(numeroDoJogador);
+        Lutador computador = pegarLutador(numeroDoComputador);
 
         System.out.println();
         System.out.println("  O computador vai lutar com " + computador.nome + "!");
@@ -91,8 +114,8 @@ public class Jogo {
         int numero1 = escolherLutador("JOGADOR 1");
         int numero2 = escolherLutador("JOGADOR 2");
 
-        Lutador jogador1 = lutadores[numero1 - 1].criarCopia();
-        Lutador jogador2 = lutadores[numero2 - 1].criarCopia();
+        Lutador jogador1 = pegarLutador(numero1);
+        Lutador jogador2 = pegarLutador(numero2);
 
         // se os dois escolherem o mesmo numero, marcamos quem e quem no placar
         if (numero1 == numero2) {
@@ -107,6 +130,25 @@ public class Jogo {
 
     // ===================== ESCOLHER O LUTADOR =====================
 
+    // Devolve uma copia do lutador que tem aquele numero na lista.
+    // E copia porque, sem ela, dois jogadores escolhendo o mesmo personagem
+    // estariam mexendo no MESMO objeto e dividindo a mesma barra de vida.
+    Lutador pegarLutador(int numero) {
+        if (numero == 1) {
+            return ryu.criarCopia();
+        } else if (numero == 2) {
+            return ken.criarCopia();
+        } else if (numero == 3) {
+            return chunLi.criarCopia();
+        } else if (numero == 4) {
+            return blanka.criarCopia();
+        } else if (numero == 5) {
+            return zangief.criarCopia();
+        } else {
+            return dhalsim.criarCopia();
+        }
+    }
+
     // Mostra a lista, pergunta o numero e devolve o numero escolhido.
     int escolherLutador(String quemEscolhe) {
         limparTela();
@@ -119,13 +161,14 @@ public class Jogo {
         int numero = teclado.nextInt();
 
         // se digitar um numero que nao esta na lista, a gente avisa e pergunta de novo
-        while (numero < 1 || numero > lutadores.length) {
-            System.out.println("  Esse numero nao esta na lista. Escolha de 1 ate " + lutadores.length + ".");
+        while (numero < 1 || numero > quantidadeDeLutadores) {
+            System.out.println("  Esse numero nao esta na lista. Escolha de 1 ate " + quantidadeDeLutadores + ".");
             numero = teclado.nextInt();
         }
 
+        Lutador escolhido = pegarLutador(numero);
         System.out.println();
-        System.out.println("  " + quemEscolhe + " vai lutar com " + lutadores[numero - 1].nome + ".");
+        System.out.println("  " + quemEscolhe + " vai lutar com " + escolhido.nome + ".");
         pausa(1200);
 
         return numero;
@@ -141,48 +184,54 @@ public class Jogo {
 
         int numero = teclado.nextInt();
 
-        while (numero < 1 || numero > lutadores.length) {
-            System.out.println("  Esse numero nao esta na lista. Escolha de 1 ate " + lutadores.length + ".");
+        while (numero < 1 || numero > quantidadeDeLutadores) {
+            System.out.println("  Esse numero nao esta na lista. Escolha de 1 ate " + quantidadeDeLutadores + ".");
             numero = teclado.nextInt();
         }
 
+        Lutador escolhido = pegarLutador(numero);
+
         System.out.println();
-        System.out.println("  FICHA DE " + lutadores[numero - 1].nome.toUpperCase());
+        System.out.println("  FICHA DE " + escolhido.nome.toUpperCase());
         System.out.println("  --------------------------------------------------");
-        lutadores[numero - 1].ficha();
+        escolhido.ficha();
         System.out.println();
         System.out.println("  Digite 1 para voltar ao menu.");
         teclado.nextInt();
     }
 
-    // Cada lutador sabe se mostrar na lista, entao aqui so percorremos o array.
+    // Cada lutador sabe se mostrar na lista, entao aqui e so mandar
+    // cada um deles se mostrar, um embaixo do outro.
     void mostrarLista() {
         System.out.println();
         System.out.println("  LUTADORES DISPONIVEIS");
         System.out.println("  --------------------------------------------------");
-        System.out.println(cor.cinza + "   #   NOME       PAIS      SOCO  CHUTE  ESP   DEF   VEL   ESPECIAL" + cor.reset);
+        System.out.println(cinza + "   #   NOME       PAIS      SOCO  CHUTE  ESP   DEF   VEL   ESPECIAL" + reset);
 
-        for (int i = 0; i < lutadores.length; i++) {
-            lutadores[i].mostrarNaLista(i + 1);
-        }
+        ryu.mostrarNaLista(1);
+        ken.mostrarNaLista(2);
+        chunLi.mostrarNaLista(3);
+        blanka.mostrarNaLista(4);
+        zangief.mostrarNaLista(5);
+        dhalsim.mostrarNaLista(6);
     }
 
     // ===================== TELAS =====================
 
     void mostrarAbertura() {
         System.out.println();
-        System.out.println(cor.amarelo + cor.negrito + "   ____   _____  ____   _____  _____  _____ " + cor.reset);
-        System.out.println(cor.amarelo + cor.negrito + "  / ___| |_   _||  _ \\ | ____|| ____||_   _|" + cor.reset);
-        System.out.println(cor.amarelo + cor.negrito + "  \\___ \\   | |  | |_) ||  _|  |  _|    | |  " + cor.reset);
-        System.out.println(cor.amarelo + cor.negrito + "   ___) |  | |  |  _ < | |___ | |___   | |  " + cor.reset);
-        System.out.println(cor.amarelo + cor.negrito + "  |____/   |_|  |_| \\_\\|_____||_____|  |_|  " + cor.reset);
-        System.out.println(cor.vermelho + cor.negrito + "   _____  ___   ____  _   _  _____  _____  ____  " + cor.reset);
-        System.out.println(cor.vermelho + cor.negrito + "  |  ___||_ _| / ___|| | | ||_   _|| ____||  _ \\ " + cor.reset);
-        System.out.println(cor.vermelho + cor.negrito + "  | |_    | | | |  _ | |_| |  | |  |  _|  | |_) |" + cor.reset);
-        System.out.println(cor.vermelho + cor.negrito + "  |  _|   | | | |_| ||  _  |  | |  | |___ |  _ < " + cor.reset);
-        System.out.println(cor.vermelho + cor.negrito + "  |_|    |___| \\____||_| |_|  |_|  |_____||_| \\_\\" + cor.reset);
+        System.out.println(amarelo + negrito + "   ____   _____  ____   _____  _____  _____ " + reset);
+        System.out.println(amarelo + negrito + "  / ___| |_   _||  _ \\ | ____|| ____||_   _|" + reset);
+        System.out.println(amarelo + negrito + "  \\___ \\   | |  | |_) ||  _|  |  _|    | |  " + reset);
+        System.out.println(amarelo + negrito + "   ___) |  | |  |  _ < | |___ | |___   | |  " + reset);
+        System.out.println(amarelo + negrito + "  |____/   |_|  |_| \\_\\|_____||_____|  |_|  " + reset);
+        System.out.println(vermelho + negrito + "   _____  ___   ____  _   _  _____  _____  ____  " + reset);
+        System.out.println(vermelho + negrito + "  |  ___||_ _| / ___|| | | ||_   _|| ____||  _ \\ " + reset);
+        System.out.println(vermelho + negrito + "  | |_    | | | |  _ | |_| |  | |  |  _|  | |_) |" + reset);
+        System.out.println(vermelho + negrito + "  |  _|   | | | |_| ||  _  |  | |  | |___ |  _ < " + reset);
+        System.out.println(vermelho + negrito + "  |_|    |___| \\____||_| |_|  |_|  |_____||_| \\_\\" + reset);
         System.out.println();
-        System.out.println(cor.cinza + "  jogo de luta em java  -  programacao orientada a objetos" + cor.reset);
+        System.out.println(cinza + "  jogo de luta em java  -  programacao orientada a objetos" + reset);
         System.out.println();
     }
 
@@ -198,7 +247,7 @@ public class Jogo {
     // ===================== FERRAMENTAS =====================
 
     void limparTela() {
-        System.out.print(cor.escape + "[H" + cor.escape + "[J");
+        System.out.print(escape + "[H" + escape + "[J");
     }
 
     // O try/catch aqui e uma exigencia do Java para usar o Thread.sleep.

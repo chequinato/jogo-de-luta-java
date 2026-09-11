@@ -28,8 +28,7 @@ eram nos exercícios da aula.
 |---|---|
 | `Lutador` | **O personagem.** Tem os atributos (nome, vida, dano dos golpes...), o construtor e os métodos (`soco`, `chute`, `defender`, `provocar`, `golpeEspecial`, `ficha`). |
 | `Arena` | **A luta.** Guarda os dois lutadores, controla os rounds e os turnos, desenha o placar e decide quem venceu. |
-| `Jogo` | **O jogo.** Guarda a lista de lutadores, mostra o menu e deixa o jogador escolher o personagem. |
-| `Cores` | Só guarda os códigos de cor do terminal, para o resto do código escrever `cor.vermelho` em vez de um monte de símbolo. |
+| `Jogo` | **O jogo.** Guarda os seis lutadores, mostra o menu e deixa o jogador escolher o personagem. |
 | `App` | Classe principal com o `main`. Só cria o objeto `Jogo` e manda ele abrir o menu. |
 
 O `App` ficou igual ao das aulas: cria um objeto e chama um método dele.
@@ -89,9 +88,10 @@ Não tem biblioteca nenhuma, é tudo `System.out.println` com pausa:
    entre a vida antiga e a vida nova, com uma pausa de 60 milésimos entre elas.
    Um monte de quadros parados em sequência vira animação.
 
-Os únicos comandos "de terminal" usados são três: um para mudar a cor (na
-classe `Cores`), um para mandar o cursor lá para cima (`voltarAoTopo`) e um
-para apagar o resto da tela (`apagarORestante`).
+Os únicos comandos "de terminal" usados são três: um para mudar a cor, um
+para mandar o cursor lá para cima (`voltarAoTopo`) e um para apagar o resto
+da tela (`apagarORestante`). Os códigos de cor ficam guardados em atributos
+`String` no começo de cada classe.
 
 ## Conceitos de POO usados (para explicar na apresentação)
 
@@ -105,10 +105,10 @@ para apagar o resto da tela (`apagarORestante`).
 - **Um objeto agindo sobre outro**: `ryu.soco(ken)` — o método recebe outro
   `Lutador` como parâmetro e mexe na vida dele, igualzinho ao exercício do
   `atacarOutroPersonagem`.
-- **Objetos que trabalham juntos**: a `Arena` guarda dois `Lutador` dentro
-  dela; o `Jogo` guarda um array de `Lutador` e cria a `Arena` na hora da luta.
-- **Array de objetos**: `Lutador[] lutadores` guarda os 6 personagens juntos,
-  e o `for` passa por todos para mostrar a lista.
+- **Vários objetos da mesma classe**: o `Jogo` cria seis `Lutador`, cada um
+  na sua variável (`ryu`, `ken`, `chunLi`...), igual aos três pokémons da aula.
+- **Objetos que trabalham juntos**: a `Arena` recebe dois `Lutador` e faz os
+  dois lutarem, um mexendo na vida do outro.
 - **`this`**: usado dentro da classe para deixar claro que estamos falando do
   atributo daquele objeto, e não de uma variável qualquer.
 - **Cópia de objeto**: o método `criarCopia()` existe porque, sem ele, dois
@@ -117,7 +117,8 @@ para apagar o resto da tela (`apagarORestante`).
 
 ## Ideias para aumentar o projeto depois
 
-- Mais lutadores (é só acrescentar uma linha no construtor do `Jogo`).
+- Mais lutadores (criar outro `Lutador` no construtor do `Jogo` e acrescentar
+  ele no `pegarLutador` e no `mostrarLista`).
 - Um segundo golpe especial por personagem.
 - Um cenário que mude alguma regra da luta.
 - Salvar o placar das lutas em um arquivo.
