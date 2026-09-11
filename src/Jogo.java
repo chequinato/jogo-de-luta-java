@@ -10,20 +10,21 @@ public class Jogo {
     Cores cor;
 
     // ===================== CONSTRUTOR =====================
-    // E aqui que os 6 lutadores sao criados. Para colocar mais um, e so
-    // aumentar o numero do new Lutador[6] e acrescentar outra linha.
+    // E aqui que os 6 lutadores sao criados, cada um com o dano dos seus
+    // golpes ja definido. Para colocar mais um, e so aumentar o numero do
+    // new Lutador[6] e acrescentar outra linha.
     public Jogo() {
         this.teclado = new Scanner(System.in);
         this.cor = new Cores();
 
         this.lutadores = new Lutador[6];
-        //                             nome       pais      estilo        especial               for def vel
-        this.lutadores[0] = new Lutador("Ryu",     "Japao",  "Karate",     "HADOUKEN",             11,  5,  6);
-        this.lutadores[1] = new Lutador("Ken",     "EUA",    "Karate",     "SHORYUKEN",            13,  4,  7);
-        this.lutadores[2] = new Lutador("Chun-Li", "China",  "Kung Fu",    "SPINNING BIRD KICK",    9,  4,  9);
-        this.lutadores[3] = new Lutador("Blanka",  "Brasil", "Selvagem",   "ELECTRIC THUNDER",     14,  3,  6);
-        this.lutadores[4] = new Lutador("Zangief", "Russia", "Luta Livre", "SPINNING PILEDRIVER",  16,  7,  2);
-        this.lutadores[5] = new Lutador("Dhalsim", "India",  "Yoga",       "YOGA FLAME",           10,  3,  8);
+        //                             nome       pais      estilo        especial              soco chute esp def vel
+        this.lutadores[0] = new Lutador("Ryu",     "Japao",  "Karate",     "HADOUKEN",             14,  22,  45,  5,  6);
+        this.lutadores[1] = new Lutador("Ken",     "EUA",    "Karate",     "SHORYUKEN",            16,  24,  48,  4,  7);
+        this.lutadores[2] = new Lutador("Chun-Li", "China",  "Kung Fu",    "SPINNING BIRD KICK",   13,  20,  42,  4,  9);
+        this.lutadores[3] = new Lutador("Blanka",  "Brasil", "Selvagem",   "ELECTRIC THUNDER",     17,  26,  50,  3,  6);
+        this.lutadores[4] = new Lutador("Zangief", "Russia", "Luta Livre", "SPINNING PILEDRIVER",  19,  30,  55,  7,  2);
+        this.lutadores[5] = new Lutador("Dhalsim", "India",  "Yoga",       "YOGA FLAME",           14,  23,  46,  3,  8);
     }
 
     // ===================== O MENU =====================
@@ -44,7 +45,7 @@ public class Jogo {
             System.out.println("   " + cor.amarelo + "[4]" + cor.reset + " Sair do jogo");
             System.out.println();
 
-            int opcao = lerNumero(1, 4);
+            int opcao = teclado.nextInt();
 
             if (opcao == 1) {
                 jogarContraOComputador();
@@ -52,9 +53,12 @@ public class Jogo {
                 jogarContraOutroJogador();
             } else if (opcao == 3) {
                 verFichaDeUmLutador();
-            } else {
+            } else if (opcao == 4) {
                 jogando = false;
                 mostrarDespedida();
+            } else {
+                System.out.println("  Essa opcao nao esta no menu. Digite 1, 2, 3 ou 4.");
+                pausa(1800);
             }
         }
     }
@@ -62,21 +66,21 @@ public class Jogo {
     // ===================== OS DOIS MODOS DE JOGO =====================
 
     void jogarContraOComputador() {
-        Lutador jogador = escolherLutador("JOGADOR 1");
+        int numeroDoJogador = escolherLutador("JOGADOR 1");
 
-        // o computador sorteia um lutador qualquer
-        int numeroSorteado = 1 + (int) (Math.random() * lutadores.length);
-        Lutador computador = lutadores[numeroSorteado - 1].criarCopia();
-
-        // se der o mesmo personagem, marcamos quem e quem no placar
-        if (jogador.nome.equals(computador.nome)) {
-            jogador.nome = jogador.nome + " P1";
-            computador.nome = computador.nome + " CPU";
+        // o computador sempre pega o proximo lutador da lista.
+        // se o jogador escolheu o ultimo, o computador volta para o primeiro.
+        int numeroDoComputador = numeroDoJogador + 1;
+        if (numeroDoComputador > lutadores.length) {
+            numeroDoComputador = 1;
         }
 
+        Lutador jogador = lutadores[numeroDoJogador - 1].criarCopia();
+        Lutador computador = lutadores[numeroDoComputador - 1].criarCopia();
+
         System.out.println();
-        System.out.println("  O computador escolheu " + computador.nome + "!");
-        pausa(1500);
+        System.out.println("  O computador vai lutar com " + computador.nome + "!");
+        pausa(1800);
 
         // o true avisa a Arena que o lutador 2 e o computador
         Arena arena = new Arena(jogador, computador, true, teclado);
@@ -84,11 +88,14 @@ public class Jogo {
     }
 
     void jogarContraOutroJogador() {
-        Lutador jogador1 = escolherLutador("JOGADOR 1");
-        Lutador jogador2 = escolherLutador("JOGADOR 2");
+        int numero1 = escolherLutador("JOGADOR 1");
+        int numero2 = escolherLutador("JOGADOR 2");
 
-        // se os dois escolherem o mesmo personagem, marcamos quem e quem
-        if (jogador1.nome.equals(jogador2.nome)) {
+        Lutador jogador1 = lutadores[numero1 - 1].criarCopia();
+        Lutador jogador2 = lutadores[numero2 - 1].criarCopia();
+
+        // se os dois escolherem o mesmo numero, marcamos quem e quem no placar
+        if (numero1 == numero2) {
             jogador1.nome = jogador1.nome + " P1";
             jogador2.nome = jogador2.nome + " P2";
         }
@@ -100,8 +107,8 @@ public class Jogo {
 
     // ===================== ESCOLHER O LUTADOR =====================
 
-    // Mostra a lista, pergunta o numero e devolve uma COPIA do escolhido.
-    Lutador escolherLutador(String quemEscolhe) {
+    // Mostra a lista, pergunta o numero e devolve o numero escolhido.
+    int escolherLutador(String quemEscolhe) {
         limparTela();
         mostrarAbertura();
         mostrarLista();
@@ -109,14 +116,19 @@ public class Jogo {
         System.out.println();
         System.out.println("  " + quemEscolhe + ", escolha seu lutador:");
 
-        int numero = lerNumero(1, lutadores.length);
-        Lutador escolhido = lutadores[numero - 1].criarCopia();
+        int numero = teclado.nextInt();
+
+        // se digitar um numero que nao esta na lista, a gente avisa e pergunta de novo
+        while (numero < 1 || numero > lutadores.length) {
+            System.out.println("  Esse numero nao esta na lista. Escolha de 1 ate " + lutadores.length + ".");
+            numero = teclado.nextInt();
+        }
 
         System.out.println();
-        System.out.println("  " + quemEscolhe + " vai lutar com " + escolhido.nome + ".");
+        System.out.println("  " + quemEscolhe + " vai lutar com " + lutadores[numero - 1].nome + ".");
         pausa(1200);
 
-        return escolhido;
+        return numero;
     }
 
     void verFichaDeUmLutador() {
@@ -127,7 +139,12 @@ public class Jogo {
         System.out.println();
         System.out.println("  Escolha um lutador para ver a ficha completa:");
 
-        int numero = lerNumero(1, lutadores.length);
+        int numero = teclado.nextInt();
+
+        while (numero < 1 || numero > lutadores.length) {
+            System.out.println("  Esse numero nao esta na lista. Escolha de 1 ate " + lutadores.length + ".");
+            numero = teclado.nextInt();
+        }
 
         System.out.println();
         System.out.println("  FICHA DE " + lutadores[numero - 1].nome.toUpperCase());
@@ -135,7 +152,7 @@ public class Jogo {
         lutadores[numero - 1].ficha();
         System.out.println();
         System.out.println("  Digite 1 para voltar ao menu.");
-        lerNumero(1, 1);
+        teclado.nextInt();
     }
 
     // Cada lutador sabe se mostrar na lista, entao aqui so percorremos o array.
@@ -143,7 +160,7 @@ public class Jogo {
         System.out.println();
         System.out.println("  LUTADORES DISPONIVEIS");
         System.out.println("  --------------------------------------------------");
-        System.out.println(cor.cinza + "   #   NOME       PAIS       ESTILO        FOR  DEF  VEL  ESPECIAL" + cor.reset);
+        System.out.println(cor.cinza + "   #   NOME       PAIS      SOCO  CHUTE  ESP   DEF   VEL   ESPECIAL" + cor.reset);
 
         for (int i = 0; i < lutadores.length; i++) {
             lutadores[i].mostrarNaLista(i + 1);
@@ -179,30 +196,6 @@ public class Jogo {
     }
 
     // ===================== FERRAMENTAS =====================
-
-    // Le um numero do teclado e so aceita se estiver entre minimo e maximo.
-    int lerNumero(int minimo, int maximo) {
-        int numero = 0;
-        boolean numeroCerto = false;
-
-        while (numeroCerto == false) {
-            System.out.print("  > ");
-
-            if (teclado.hasNextInt()) {
-                numero = teclado.nextInt();
-                if (numero >= minimo && numero <= maximo) {
-                    numeroCerto = true;
-                }
-            } else {
-                teclado.next();   // joga fora o que foi digitado de errado
-            }
-
-            if (numeroCerto == false) {
-                System.out.println("  Digite um numero de " + minimo + " ate " + maximo + ".");
-            }
-        }
-        return numero;
-    }
 
     void limparTela() {
         System.out.print(cor.escape + "[H" + cor.escape + "[J");

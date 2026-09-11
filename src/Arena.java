@@ -1,12 +1,12 @@
 import java.util.Scanner;
 
 // Esta classe e a luta. Ela guarda os dois lutadores, controla os rounds e
-// os turnos, desenha a tela da luta e decide quem venceu.
+// os turnos, desenha o placar na tela e decide quem venceu.
 public class Arena {
 
     // ===================== ATRIBUTOS =====================
-    Lutador lutador1;               // fica do lado esquerdo da tela
-    Lutador lutador2;               // fica do lado direito da tela
+    Lutador lutador1;
+    Lutador lutador2;
     boolean lutador2EhComputador;
 
     int round;
@@ -29,17 +29,13 @@ public class Arena {
         this.cor = new Cores();
         this.linhaDupla = repetir("=", 62);
         this.linhaSimples = repetir("-", 62);
-
-        // um lutador olha para o outro
-        this.lutador1.olhandoParaDireita = true;
-        this.lutador2.olhandoParaDireita = false;
     }
 
     // ===================== A LUTA INTEIRA =====================
 
     void lutar() {
         mostrarVersus();
-        pausa(3000);
+        pausa(3500);
 
         // a luta continua enquanto ninguem chegou a 2 rounds vencidos
         while (lutador1.roundsVencidos < 2 && lutador2.roundsVencidos < 2) {
@@ -59,18 +55,29 @@ public class Arena {
 
         this.turno = 1;
 
+        // quem tem mais velocidade comeca o round
+        Lutador primeiro = lutador1;
+        Lutador segundo = lutador2;
+        boolean primeiroEhComputador = false;
+        boolean segundoEhComputador = lutador2EhComputador;
+
+        if (lutador2.velocidade > lutador1.velocidade) {
+            primeiro = lutador2;
+            segundo = lutador1;
+            primeiroEhComputador = lutador2EhComputador;
+            segundoEhComputador = false;
+        }
+
         // o round acaba quando a vida de um dos dois chega a zero
         while (lutador1.estaVivo() && lutador2.estaVivo()) {
 
-            // primeiro age o lutador da esquerda
-            jogarTurno(lutador1, lutador2, false);
+            jogarTurno(primeiro, segundo, primeiroEhComputador);
 
-            if (lutador2.estaVivo() == false) {
-                break;   // o lutador 2 caiu, entao nem chega a jogar
+            if (segundo.estaVivo() == false) {
+                break;   // ele caiu, entao nem chega a jogar
             }
 
-            // depois age o lutador da direita
-            jogarTurno(lutador2, lutador1, lutador2EhComputador);
+            jogarTurno(segundo, primeiro, segundoEhComputador);
 
             this.turno = this.turno + 1;
         }
@@ -81,7 +88,7 @@ public class Arena {
     // ===================== UM TURNO =====================
 
     void jogarTurno(Lutador atacante, Lutador defensor, boolean ehComputador) {
-        // a guarda e a provocacao valem so ate o proprio lutador agir de novo
+        // a guarda levantada e a guarda aberta valem so ate o lutador agir de novo
         atacante.limparPostura();
 
         int acao;
@@ -89,20 +96,27 @@ public class Arena {
         if (ehComputador) {
             acao = escolherAcaoDoComputador(atacante, defensor);
             System.out.println("  " + atacante.nome + " (computador) se movimenta...");
-            pausa(900);
+            pausa(1000);
         } else {
-            mostrarCena();                  // desenha a luta e limpa o resto da tela
+            mostrarPlacarLimpo();           // desenha o placar e limpa o resto da tela
             mostrarMenuDeAcoes(atacante);
-            acao = lerNumero(1, 5);
 
-            // nao deixa usar o especial sem a furia cheia
+            acao = teclado.nextInt();
+
+            // se digitar um numero que nao esta no menu, a gente avisa e pergunta de novo
+            while (acao < 1 || acao > 5) {
+                System.out.println("  Essa opcao nao esta no menu. Digite de 1 ate 5.");
+                acao = teclado.nextInt();
+            }
+
+            // o especial so sai com a furia cheia
             while (acao == 5 && atacante.furia < 100) {
                 System.out.println("  A furia de " + atacante.nome + " esta em "
                     + atacante.furia + "/100. Escolha outra acao.");
-                acao = lerNumero(1, 5);
+                acao = teclado.nextInt();
             }
 
-            mostrarCena();                  // apaga o menu da tela
+            mostrarPlacarLimpo();           // apaga o menu da tela
         }
 
         executarAcao(acao, atacante, defensor);
@@ -126,70 +140,51 @@ public class Arena {
             atacante.provocar();
 
         } else {
-            // o golpe especial tem uma entrada mais caprichada:
-            // o lutador se concentra e depois o golpe atravessa a tela
-            atacante.pose = "especial";
-            desenharCena(-1);
-            pausa(500);
-
-            // se quem atacou foi o lutador da esquerda, o golpe voa para a direita
-            animarEspecial(atacante.olhandoParaDireita);
-
+            // o golpe especial tem uma entrada mais caprichada
+            caixa(atacante.nome.toUpperCase() + " USOU " + atacante.especial, cor.roxo);
+            pausa(900);
             atacante.golpeEspecial(defensor);
         }
 
-        // se o adversario perdeu vida, a barra desce animada;
-        // se nao perdeu (defendeu, errou, provocou), so redesenhamos a cena
+        // se o adversario perdeu vida, a barra desce animada
         if (defensor.vida < vidaAntes) {
             animarDano(defensor, vidaAntes);
         } else {
-            desenharCena(-1);
+            desenharPlacar();
         }
 
-        pausa(1600);
+        pausa(1700);
     }
 
     // ===================== O COMPUTADOR ESCOLHENDO =====================
+    // Nao tem sorteio: o computador segue sempre as mesmas regras.
 
     int escolherAcaoDoComputador(Lutador computador, Lutador inimigo) {
         // com a furia cheia, o especial vem na hora
         if (computador.furia >= 100) {
             return 5;
         }
-        // com pouca vida, ele costuma se proteger
-        if (computador.vida < 30 && sorteio(1, 100) <= 45) {
+        // com pouca vida, ele se protege
+        if (computador.vida < 30) {
             return 3;
         }
         // se o inimigo esta quase caindo, ele parte pra cima
         if (inimigo.vida <= 25) {
             return 2;
         }
-
-        // no resto do tempo ele sorteia o que fazer
-        int sorte = sorteio(1, 100);
-
-        if (sorte <= 40) {
-            return 1;    // soco
-        } else if (sorte <= 72) {
-            return 2;    // chute
-        } else if (sorte <= 90) {
-            return 3;    // defender
+        // no resto do tempo ele vai alternando soco e chute
+        if (turno % 2 == 0) {
+            return 2;
         } else {
-            return 4;    // provocar
+            return 1;
         }
-    }
-
-    int sorteio(int minimo, int maximo) {
-        return minimo + (int) (Math.random() * (maximo - minimo + 1));
     }
 
     // ===================== DESENHAR A LUTA =====================
 
-    // Desenha o placar e os dois bonecos. Sao sempre 14 linhas, nem uma a mais,
+    // Desenha o placar dos dois lutadores. Sao sempre 7 linhas, nem uma a mais,
     // por isso da para redesenhar por cima sem baguncar o texto que esta embaixo.
-    // "posicaoDoEspecial" e a coluna onde o golpe especial esta voando;
-    // quando vale -1 e porque nao tem golpe nenhum voando.
-    void desenharCena(int posicaoDoEspecial) {
+    void desenharPlacar() {
         voltarAoTopo();
 
         System.out.println();
@@ -200,66 +195,29 @@ public class Arena {
         lutador1.mostrarBarras();
         lutador2.mostrarBarras();
         System.out.println(cor.cinza + "  " + linhaDupla + cor.reset);
-        System.out.println();
-
-        // os dois bonecos, um de frente para o outro
-        String[] esquerda = lutador1.desenho();
-        String[] direita = lutador2.desenho();
-
-        for (int i = 0; i < 4; i++) {
-            String meio = repetir(" ", 38);
-
-            // o golpe especial voa na altura dos bracos, que e a linha 1
-            if (i == 1 && posicaoDoEspecial >= 0) {
-                meio = repetir(" ", posicaoDoEspecial) + "(*)"
-                     + repetir(" ", 38 - posicaoDoEspecial - 3);
-            }
-
-            System.out.println("  " + cor.azul + esquerda[i] + cor.reset
-                             + meio + cor.vermelho + direita[i] + cor.reset);
-        }
-
-        System.out.println("  " + cor.cinza + repetir("_", 62) + cor.reset);
-        System.out.println();
     }
 
-    // Desenha a luta e apaga tudo o que estiver embaixo dela.
-    void mostrarCena() {
-        desenharCena(-1);
+    // Desenha o placar e apaga tudo o que estiver embaixo dele.
+    void mostrarPlacarLimpo() {
+        desenharPlacar();
         apagarORestante();
+        System.out.println();
     }
-
-    // ===================== AS ANIMACOES =====================
-    // As duas fazem a mesma coisa: desenham a cena varias vezes seguidas,
-    // mudando um pouquinho a cada vez, com uma pausa no meio.
 
     // A barra de vida desce aos poucos ate chegar no valor novo.
+    // O truque e desenhar o placar 7 vezes seguidas, cada uma com um valor
+    // entre a vida antiga e a vida nova, com uma pausa entre elas.
     void animarDano(Lutador quemLevou, int vidaAntes) {
         int vidaDepois = quemLevou.vida;
 
         for (int i = 1; i <= 7; i++) {
-            // vai descendo a vida de pouquinho em pouquinho
             quemLevou.vida = vidaAntes - (((vidaAntes - vidaDepois) * i) / 7);
-            desenharCena(-1);
+            desenharPlacar();
             pausa(60);
         }
 
         quemLevou.vida = vidaDepois;   // garante que o valor final fique certo
-        desenharCena(-1);
-    }
-
-    // O golpe especial atravessa a tela de um lutador ate o outro.
-    void animarEspecial(boolean vaiDaEsquerda) {
-        for (int passo = 0; passo <= 35; passo = passo + 3) {
-            int coluna = passo;
-
-            if (vaiDaEsquerda == false) {
-                coluna = 35 - passo;   // vindo da direita, anda ao contrario
-            }
-
-            desenharCena(coluna);
-            pausa(45);
-        }
+        desenharPlacar();
     }
 
     // ===================== AS TELAS =====================
@@ -269,27 +227,26 @@ public class Arena {
         System.out.println();
         caixa(lutador1.nome.toUpperCase() + "  contra  " + lutador2.nome.toUpperCase(), cor.amarelo);
         System.out.println();
-
-        String[] esquerda = lutador1.desenho();
-        String[] direita = lutador2.desenho();
-        for (int i = 0; i < 4; i++) {
-            System.out.println("  " + cor.azul + esquerda[i] + cor.reset
-                + repetir(" ", 38) + cor.vermelho + direita[i] + cor.reset);
-        }
-        System.out.println("  " + cor.cinza + repetir("_", 62) + cor.reset);
-
-        System.out.println();
         mostrarResumo(lutador1, cor.azul);
         System.out.println();
         mostrarResumo(lutador2, cor.vermelho);
         System.out.println();
+
+        // quem for mais rapido comeca o round
+        if (lutador1.velocidade > lutador2.velocidade) {
+            System.out.println("  " + lutador1.nome + " e mais rapido e comeca atacando.");
+        } else {
+            System.out.println("  " + lutador2.nome + " e mais rapido e comeca atacando.");
+        }
     }
 
     // Resumo curto de um lutador, usado na tela de apresentacao da luta.
     void mostrarResumo(Lutador lutador, String corDoLado) {
         System.out.println("  " + corDoLado + cor.negrito + completar(lutador.nome.toUpperCase(), 14) + cor.reset
             + cor.cinza + lutador.pais + " - " + lutador.estilo + " - " + lutador.especial + cor.reset);
-        System.out.println("  " + cor.cinza + "forca " + lutador.forca
+        System.out.println("  " + cor.cinza + "soco " + lutador.danoDoSoco
+            + "   chute " + lutador.danoDoChute
+            + "   especial " + lutador.danoDoEspecial
             + "   defesa " + lutador.defesa
             + "   velocidade " + lutador.velocidade + cor.reset);
     }
@@ -307,15 +264,15 @@ public class Arena {
 
     void mostrarMenuDeAcoes(Lutador lutador) {
         System.out.println("  " + cor.negrito + lutador.nome.toUpperCase() + cor.reset + ", escolha o que fazer:");
-        System.out.println("   " + cor.amarelo + "[1]" + cor.reset + " Soco      " + cor.cinza + "rapido, sempre acerta" + cor.reset);
-        System.out.println("   " + cor.amarelo + "[2]" + cor.reset + " Chute     " + cor.cinza + "mais forte, mas pode errar" + cor.reset);
+        System.out.println("   " + cor.amarelo + "[1]" + cor.reset + " Soco      " + cor.cinza + "tira " + lutador.danoDoSoco + " e mantem a guarda" + cor.reset);
+        System.out.println("   " + cor.amarelo + "[2]" + cor.reset + " Chute     " + cor.cinza + "tira " + lutador.danoDoChute + ", mas abre a guarda" + cor.reset);
         System.out.println("   " + cor.amarelo + "[3]" + cor.reset + " Defender  " + cor.cinza + "corta pela metade o dano do proximo golpe" + cor.reset);
         System.out.println("   " + cor.amarelo + "[4]" + cor.reset + " Provocar  " + cor.cinza + "enche muito a furia, mas abre a guarda" + cor.reset);
 
         // o especial so aparece liberado quando a furia chega em 100
         if (lutador.furia >= 100) {
             System.out.println("   " + cor.amarelo + "[5]" + cor.reset + " Especial  "
-                + cor.verde + "PRONTO - " + lutador.especial + cor.reset);
+                + cor.verde + "PRONTO - " + lutador.especial + " tira " + lutador.danoDoEspecial + cor.reset);
         } else {
             System.out.println("   " + cor.amarelo + "[5]" + cor.reset + " Especial  "
                 + cor.cinza + "precisa de 100 de furia (voce tem " + lutador.furia + ")" + cor.reset);
@@ -333,8 +290,7 @@ public class Arena {
         }
 
         vencedor.vencerRound();
-        vencedor.pose = "vitoria";
-        mostrarCena();
+        mostrarPlacarLimpo();
 
         caixa("K . O .", cor.vermelho);
         System.out.println();
@@ -355,22 +311,9 @@ public class Arena {
             perdedor = lutador1;
         }
 
-        vencedor.pose = "vitoria";
-        perdedor.pose = "ko";
-
         limparTela();
         System.out.println();
         caixa("V E N C E D O R :  " + vencedor.nome.toUpperCase(), cor.amarelo);
-        System.out.println();
-
-        String[] esquerda = lutador1.desenho();
-        String[] direita = lutador2.desenho();
-        for (int i = 0; i < 4; i++) {
-            System.out.println("  " + cor.azul + esquerda[i] + cor.reset
-                + repetir(" ", 38) + cor.vermelho + direita[i] + cor.reset);
-        }
-        System.out.println("  " + cor.cinza + repetir("_", 62) + cor.reset);
-
         System.out.println();
         System.out.println("  " + cor.negrito + vencedor.nome.toUpperCase() + cor.reset
             + " venceu a luta por " + vencedor.roundsVencidos + " a " + perdedor.roundsVencidos + ".");
@@ -383,7 +326,7 @@ public class Arena {
 
         System.out.println();
         System.out.println("  Digite 1 para voltar ao menu.");
-        lerNumero(1, 1);
+        teclado.nextInt();
     }
 
     // Moldura usada nos momentos importantes: ROUND, LUTEM, K.O., VENCEDOR.
@@ -395,30 +338,6 @@ public class Arena {
     }
 
     // ===================== FERRAMENTAS =====================
-
-    // Le um numero do teclado e so aceita se estiver entre minimo e maximo.
-    int lerNumero(int minimo, int maximo) {
-        int numero = 0;
-        boolean numeroCerto = false;
-
-        while (numeroCerto == false) {
-            System.out.print("  > ");
-
-            if (teclado.hasNextInt()) {
-                numero = teclado.nextInt();
-                if (numero >= minimo && numero <= maximo) {
-                    numeroCerto = true;
-                }
-            } else {
-                teclado.next();   // joga fora o que foi digitado de errado
-            }
-
-            if (numeroCerto == false) {
-                System.out.println("  Digite um numero de " + minimo + " ate " + maximo + ".");
-            }
-        }
-        return numero;
-    }
 
     // Manda o cursor para o canto de cima da tela, para desenhar por cima
     // do que ja estava la. E isso que faz a animacao nao ficar piscando.

@@ -1,6 +1,6 @@
 // Esta classe e o personagem do jogo.
-// Cada lutador criado a partir dela tem a sua propria vida, forca, defesa,
-// e sabe atacar, defender, mostrar a ficha e ate se desenhar na tela.
+// Cada lutador tem a sua propria vida, os seus golpes e sabe atacar,
+// defender e mostrar os proprios dados na tela.
 public class Lutador {
 
     // ===================== ATRIBUTOS =====================
@@ -12,9 +12,15 @@ public class Lutador {
     int vida;
     int vidaMaxima;
     int furia;            // enche durante a luta e libera o golpe especial
-    int forca;            // quanto dano o lutador causa
+
+    // o dano de cada golpe ja vem definido quando o lutador e criado.
+    // e por isso que o Zangief bate mais forte que a Chun-Li.
+    int danoDoSoco;
+    int danoDoChute;
+    int danoDoEspecial;
+
     int defesa;           // quanto dano o lutador consegue segurar
-    int velocidade;       // chance de desviar dos golpes
+    int velocidade;       // quem tem mais velocidade comeca o round
     int roundsVencidos;
 
     // numeros guardados so para mostrar as estatisticas no fim da luta
@@ -23,23 +29,25 @@ public class Lutador {
     int maiorGolpe;
 
     // como o lutador esta agora
-    boolean defendendo;             // esta de guarda levantada?
-    boolean provocando;             // esta se exibindo e de guarda aberta?
-    boolean olhandoParaDireita;     // fica no lado esquerdo da tela?
-    String pose;                    // qual desenho mostrar
+    boolean defendendo;      // esta de guarda levantada?
+    boolean guardaAberta;    // deu um chute ou provocou e ficou exposto?
 
     Cores cor;            // objeto com os codigos de cor do terminal
 
     // ===================== CONSTRUTOR =====================
     // E aqui que o lutador "nasce". Quem cria escolhe o nome, o pais, o estilo,
-    // o especial e os tres numeros. O resto ja comeca com valor padrao.
+    // o nome do especial, o dano dos tres golpes, a defesa e a velocidade.
+    // A vida e a furia ja comecam com o valor padrao.
     public Lutador(String nome, String pais, String estilo, String especial,
-                   int forca, int defesa, int velocidade) {
+                   int danoDoSoco, int danoDoChute, int danoDoEspecial,
+                   int defesa, int velocidade) {
         this.nome = nome;
         this.pais = pais;
         this.estilo = estilo;
         this.especial = especial;
-        this.forca = forca;
+        this.danoDoSoco = danoDoSoco;
+        this.danoDoChute = danoDoChute;
+        this.danoDoEspecial = danoDoEspecial;
         this.defesa = defesa;
         this.velocidade = velocidade;
 
@@ -51,19 +59,11 @@ public class Lutador {
         this.golpesAcertados = 0;
         this.maiorGolpe = 0;
         this.defendendo = false;
-        this.provocando = false;
-        this.olhandoParaDireita = true;
-        this.pose = "parado";
+        this.guardaAberta = false;
         this.cor = new Cores();
     }
 
     // ===================== METODOS DE APOIO =====================
-
-    // Sorteia um numero entre minimo e maximo. Serve para o dano nao ser
-    // sempre igual e para decidir se um golpe errou.
-    int sorteio(int minimo, int maximo) {
-        return minimo + (int) (Math.random() * (maximo - minimo + 1));
-    }
 
     // Cria outro Lutador igualzinho a este.
     // Isso e importante: se os dois jogadores escolhessem o mesmo personagem
@@ -71,7 +71,8 @@ public class Lutador {
     // mesma barra de vida.
     Lutador criarCopia() {
         return new Lutador(this.nome, this.pais, this.estilo, this.especial,
-                           this.forca, this.defesa, this.velocidade);
+                           this.danoDoSoco, this.danoDoChute, this.danoDoEspecial,
+                           this.defesa, this.velocidade);
     }
 
     boolean estaVivo() {
@@ -86,13 +87,10 @@ public class Lutador {
         }
     }
 
-    // A guarda levantada e a provocacao valem so ate o lutador agir de novo.
+    // A guarda levantada e a guarda aberta valem so ate o lutador agir de novo.
     void limparPostura() {
         this.defendendo = false;
-        this.provocando = false;
-        if (this.estaVivo()) {
-            this.pose = "parado";
-        }
+        this.guardaAberta = false;
     }
 
     // Deixa o lutador pronto para comecar um novo round.
@@ -100,21 +98,11 @@ public class Lutador {
         this.vida = this.vidaMaxima;
         this.furia = 0;
         this.defendendo = false;
-        this.provocando = false;
-        this.pose = "parado";
+        this.guardaAberta = false;
     }
 
     void vencerRound() {
         this.roundsVencidos = this.roundsVencidos + 1;
-    }
-
-    // O lutador consegue desviar? Quanto maior a velocidade, maior a chance.
-    // Quem esta de guarda levantada nao desvia, porque vai bloquear.
-    boolean esquivou() {
-        if (this.defendendo) {
-            return false;
-        }
-        return sorteio(1, 100) <= this.velocidade * 2;
     }
 
     // Guarda o estrago que este lutador fez no adversario.
@@ -141,8 +129,8 @@ public class Lutador {
         if (this.defendendo) {
             danoFinal = danoFinal / 2;
         }
-        // quem estava se exibindo leva 50% a mais
-        if (this.provocando) {
+        // quem esta com a guarda aberta leva 50% a mais
+        if (this.guardaAberta) {
             danoFinal = danoFinal + (danoFinal / 2);
         }
         // todo golpe tira pelo menos 1 de vida
@@ -156,32 +144,16 @@ public class Lutador {
         }
 
         this.ganharFuria(8);   // apanhar tambem enche a furia
-
-        // troca o desenho do lutador conforme o resultado
-        if (this.estaVivo()) {
-            this.pose = "dano";
-        } else {
-            this.pose = "ko";
-        }
-
         return danoFinal;
     }
 
     // ===================== OS GOLPES =====================
     // Cada golpe recebe o adversario e mexe na vida dele, igual ao exercicio
     // do atacarOutroPersonagem que fizemos em aula.
+    // O dano nao e sorteado: e o numero que o lutador ja tem guardado.
 
     void soco(Lutador inimigo) {
-        this.pose = "soco";
-
-        if (inimigo.esquivou()) {
-            this.ganharFuria(4);
-            System.out.println("  " + this.nome + " soltou um SOCO, mas " + inimigo.nome + " desviou.");
-            return;
-        }
-
-        int dano = 8 + this.forca + sorteio(0, 4);
-        int aplicado = inimigo.sofrerDano(dano, false);
+        int aplicado = inimigo.sofrerDano(this.danoDoSoco, false);
         this.registrarAcerto(aplicado);
         this.ganharFuria(12);
 
@@ -194,28 +166,16 @@ public class Lutador {
     }
 
     void chute(Lutador inimigo) {
-        this.pose = "chute";
-
-        // o chute e mais forte, mas tem 25% de chance de errar
-        if (sorteio(1, 100) <= 25) {
-            this.ganharFuria(4);
-            System.out.println("  " + this.nome + " girou o CHUTE e passou longe.");
-            return;
-        }
-
-        if (inimigo.esquivou()) {
-            this.ganharFuria(6);
-            System.out.println("  " + this.nome + " chutou, mas " + inimigo.nome + " se abaixou e escapou.");
-            return;
-        }
-
-        int dano = 14 + this.forca + sorteio(0, 6);
-        int aplicado = inimigo.sofrerDano(dano, false);
+        int aplicado = inimigo.sofrerDano(this.danoDoChute, false);
         this.registrarAcerto(aplicado);
         this.ganharFuria(18);
 
+        // o chute e mais forte, mas o lutador se abre para girar o corpo
+        this.guardaAberta = true;
+
         System.out.println("  " + this.nome + " acertou um CHUTE em cheio. "
             + inimigo.nome + " perdeu " + aplicado + " de vida.");
+        System.out.println("  Para girar o chute, " + this.nome + " ficou com a guarda aberta.");
 
         if (inimigo.defendendo) {
             System.out.println("  " + inimigo.nome + " bloqueou parte do golpe.");
@@ -224,27 +184,15 @@ public class Lutador {
 
     void defender() {
         this.defendendo = true;
-        this.pose = "defesa";
         this.ganharFuria(10);
         System.out.println("  " + this.nome + " levantou a guarda e espera o proximo golpe.");
     }
 
     void provocar() {
-        // sorteia uma das frases da lista
-        String[] frases = {
-            "Vem pra cima!",
-            "So isso que voce tem?",
-            "Voce luta como um iniciante.",
-            "Estou esperando faz tempo.",
-            "Levanta essa guarda!"
-        };
-        String frase = frases[sorteio(0, 4)];
-
-        this.provocando = true;
-        this.pose = "provoca";
+        this.guardaAberta = true;
         this.ganharFuria(35);
 
-        System.out.println("  " + this.nome + " provoca: \"" + frase + "\"");
+        System.out.println("  " + this.nome + " provoca: \"Vem pra cima!\"");
         System.out.println("  A furia sobe bastante, mas a guarda fica aberta.");
     }
 
@@ -256,10 +204,8 @@ public class Lutador {
         }
 
         this.furia = 0;
-        this.pose = "especial";
 
-        int dano = 26 + (this.forca * 2);
-        int aplicado = inimigo.sofrerDano(dano, true);   // true = atravessa a defesa
+        int aplicado = inimigo.sofrerDano(this.danoDoEspecial, true);   // true = atravessa a defesa
         this.registrarAcerto(aplicado);
 
         System.out.println("  " + this.especial + " atravessou a guarda! "
@@ -270,25 +216,28 @@ public class Lutador {
 
     // Mostra todos os dados do lutador, igual a pokedex do exercicio.
     void ficha() {
-        System.out.println("   Nome ......... " + this.nome);
-        System.out.println("   Pais ......... " + this.pais);
-        System.out.println("   Estilo ....... " + this.estilo);
-        System.out.println("   Especial ..... " + this.especial);
-        System.out.println("   Forca ........ " + this.forca);
-        System.out.println("   Defesa ....... " + this.defesa);
-        System.out.println("   Velocidade ... " + this.velocidade);
-        System.out.println("   Vida ......... " + this.vida + "/" + this.vidaMaxima);
+        System.out.println("   Nome ............ " + this.nome);
+        System.out.println("   Pais ............ " + this.pais);
+        System.out.println("   Estilo .......... " + this.estilo);
+        System.out.println("   Especial ........ " + this.especial);
+        System.out.println("   Dano do soco .... " + this.danoDoSoco);
+        System.out.println("   Dano do chute ... " + this.danoDoChute);
+        System.out.println("   Dano do especial  " + this.danoDoEspecial);
+        System.out.println("   Defesa .......... " + this.defesa);
+        System.out.println("   Velocidade ...... " + this.velocidade);
+        System.out.println("   Vida ............ " + this.vida + "/" + this.vidaMaxima);
     }
 
     // Mostra o lutador em uma linha so, para aparecer na lista de escolha.
     void mostrarNaLista(int numero) {
         System.out.println("  " + cor.amarelo + "[" + numero + "]" + cor.reset + "  "
             + cor.negrito + completar(this.nome, 11) + cor.reset
-            + completar(this.pais, 11)
-            + completar(this.estilo, 14)
-            + completar("" + this.forca, 5)
-            + completar("" + this.defesa, 5)
-            + completar("" + this.velocidade, 5)
+            + completar(this.pais, 10)
+            + completar("" + this.danoDoSoco, 6)
+            + completar("" + this.danoDoChute, 7)
+            + completar("" + this.danoDoEspecial, 6)
+            + completar("" + this.defesa, 6)
+            + completar("" + this.velocidade, 6)
             + cor.cinza + this.especial + cor.reset);
     }
 
@@ -350,154 +299,6 @@ public class Lutador {
     String marcaDosRounds() {
         return cor.amarelo + repetir("* ", this.roundsVencidos)
              + cor.cinza + repetir("- ", 2 - this.roundsVencidos) + cor.reset;
-    }
-
-    // ===================== O DESENHO DO LUTADOR =====================
-    // Sao 4 linhas de 12 letras. O lutador da esquerda olha para a direita e
-    // o da direita olha para a esquerda, entao cada pose esta escrita duas
-    // vezes, uma virada para cada lado.
-    // Para mudar um boneco, e so trocar os desenhos aqui embaixo.
-
-    String[] desenho() {
-        if (this.olhandoParaDireita) {
-            return desenhoOlhandoParaDireita();
-        } else {
-            return desenhoOlhandoParaEsquerda();
-        }
-    }
-
-    String[] desenhoOlhandoParaDireita() {
-
-        if (this.pose.equals("soco")) {
-            return new String[] {
-                "     o      ",
-                "    /|==>   ",
-                "     |      ",
-                "    / \\     " };
-        }
-        if (this.pose.equals("chute")) {
-            return new String[] {
-                "     o      ",
-                "    /|\\     ",
-                "     |==>   ",
-                "    /       " };
-        }
-        if (this.pose.equals("defesa")) {
-            return new String[] {
-                "     o      ",
-                "    /|]     ",
-                "     |]     ",
-                "    / \\     " };
-        }
-        if (this.pose.equals("provoca")) {
-            return new String[] {
-                "     o/     ",
-                "    /|      ",
-                "     |      ",
-                "    / \\     " };
-        }
-        if (this.pose.equals("especial")) {
-            return new String[] {
-                "     o      ",
-                "    /|==(*) ",
-                "     |      ",
-                "    / \\     " };
-        }
-        if (this.pose.equals("dano")) {
-            return new String[] {
-                "    \\o      ",
-                "     |\\     ",
-                "     |      ",
-                "    / \\     " };
-        }
-        if (this.pose.equals("ko")) {
-            return new String[] {
-                "            ",
-                "            ",
-                "  X_______  ",
-                "     / \\    " };
-        }
-        if (this.pose.equals("vitoria")) {
-            return new String[] {
-                "    \\o/     ",
-                "     |      ",
-                "     |      ",
-                "    / \\     " };
-        }
-
-        // se nao for nenhuma das poses de cima, ele fica parado
-        return new String[] {
-            "     o      ",
-            "    /|\\     ",
-            "     |      ",
-            "    / \\     " };
-    }
-
-    String[] desenhoOlhandoParaEsquerda() {
-
-        if (this.pose.equals("soco")) {
-            return new String[] {
-                "      o     ",
-                "   <==|\\    ",
-                "      |     ",
-                "     / \\    " };
-        }
-        if (this.pose.equals("chute")) {
-            return new String[] {
-                "      o     ",
-                "     /|\\    ",
-                "   <==|     ",
-                "       \\    " };
-        }
-        if (this.pose.equals("defesa")) {
-            return new String[] {
-                "      o     ",
-                "     [|\\    ",
-                "     [|     ",
-                "     / \\    " };
-        }
-        if (this.pose.equals("provoca")) {
-            return new String[] {
-                "     \\o     ",
-                "      |\\    ",
-                "      |     ",
-                "     / \\    " };
-        }
-        if (this.pose.equals("especial")) {
-            return new String[] {
-                "      o     ",
-                " (*)==|\\    ",
-                "      |     ",
-                "     / \\    " };
-        }
-        if (this.pose.equals("dano")) {
-            return new String[] {
-                "      o/    ",
-                "     /|     ",
-                "      |     ",
-                "     / \\    " };
-        }
-        if (this.pose.equals("ko")) {
-            return new String[] {
-                "            ",
-                "            ",
-                "  _______X  ",
-                "    / \\     " };
-        }
-        if (this.pose.equals("vitoria")) {
-            return new String[] {
-                "     \\o/    ",
-                "      |     ",
-                "      |     ",
-                "     / \\    " };
-        }
-
-        // se nao for nenhuma das poses de cima, ele fica parado
-        return new String[] {
-            "      o     ",
-            "     /|\\    ",
-            "      |     ",
-            "     / \\    " };
     }
 
     // ===================== FERRAMENTAS DE TEXTO =====================
