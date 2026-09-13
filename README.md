@@ -1,9 +1,9 @@
 # Jogo de Luta em Java — projeto de POO
 
-Jogo de luta estilo Street Fighter que roda no terminal. Dá para jogar contra
-o computador ou contra outro jogador no mesmo teclado. A luta é **melhor de 3
-rounds**: cada lutador começa o round com 100 de vida e vence a luta quem
-ganhar 2 rounds.
+Jogo de luta estilo Street Fighter que roda no terminal. **Dois jogadores no
+mesmo teclado** escolhem um lutador cada e se enfrentam em uma luta de
+**melhor de 3 rounds**: cada lutador começa o round com 100 de vida e vence a
+luta quem ganhar 2 rounds.
 
 ## Como rodar
 
@@ -17,8 +17,8 @@ javac -d bin src/*.java
 java -cp bin App
 ```
 
-A tela usa só caracteres comuns do teclado (`#`, `.`, `-`, `+`, `|`), então
-fica igual em qualquer terminal: `cmd`, PowerShell, VS Code ou IntelliJ.
+A tela usa só caracteres comuns do teclado (`#`, `.`, `-`, `=`, `+`, `|`),
+então fica igual em qualquer terminal: `cmd`, PowerShell, VS Code ou IntelliJ.
 
 ## As classes do projeto
 
@@ -41,6 +41,14 @@ public class App {
     }
 }
 ```
+
+## Menu principal
+
+O jogo abre com três opções, controladas por `if/else if` dentro do `abrirMenu`:
+
+1. **Começar a luta (Jogador 1 vs Jogador 2)**
+2. **Ver ficha de um lutador**
+3. **Sair**
 
 ## Regras da luta
 
@@ -80,27 +88,24 @@ Outros detalhes:
 | 5 | Zangief | Rússia | Luta Livre | 19 | 30 | 55 | 7 | 2 | Spinning Piledriver |
 | 6 | Dhalsim | Índia | Yoga | 14 | 23 | 46 | 3 | 8 | Yoga Flame |
 
-## Como o computador joga
-
-O computador não sorteia nada, ele decide com três `if` simples, no método
-`escolhaDoComputador` da classe `Jogo`:
-
-1. Se a vida dele está abaixo de 30, ele **defende**.
-2. Se a vida do adversário está em 25 ou menos, ele **chuta** para finalizar.
-3. Nos outros casos, ele **soca**.
-
 ## Como é feito o visual do terminal
 
 Não tem biblioteca nenhuma, é tudo `System.out.println`:
 
 - O nome **STREET FIGHTER** é desenhado com as próprias letras, uma linha de
   `println` por vez, no método `mostrarAbertura`.
+- As **bordas** das telas são feitas com duas linhas prontas: `linhaDupla`
+  (com `=`) para separar as telas importantes, e `linhaSimples` (com `-`)
+  para separar seções dentro da mesma tela.
 - A **barra de vida** é montada com um `for` que roda 20 vezes no método
   `mostrarBarra`. Cada volta acrescenta um `#` se aquele pedaço ainda tem vida,
   ou um `.` se não tem. Como a vida vai de 0 a 100, basta dividir por 5 para
   saber quantos `#` desenhar.
+- O **placar** aparece em cima da barra de vida a cada turno, mostrando os
+  rounds vencidos pelos dois lutadores.
 - O método `completar` acrescenta espaços no fim de um texto até ele ficar do
-  tamanho pedido. É isso que deixa as colunas da tabela de lutadores alinhadas.
+  tamanho pedido. É isso que deixa as colunas da tabela de lutadores alinhadas
+  e a tela de **VS** com os dois lados no mesmo lugar.
 - O `Thread.sleep` dentro do método `pausa` segura a tela por alguns instantes
   entre um golpe e outro, para dar tempo de ler o que aconteceu.
 - O `limparTela` só imprime 30 linhas em branco para empurrar a tela anterior
@@ -140,3 +145,5 @@ Não tem biblioteca nenhuma, é tudo `System.out.println`:
 - Limitar o golpe especial a um uso por round, com um atributo `int` contando.
 - Um segundo golpe especial por personagem.
 - Um cenário que mude alguma regra da luta.
+- Voltar o modo contra o computador (era um método a mais no `Jogo` que
+  decidia a ação com três `if`).
