@@ -3,395 +3,258 @@ import java.util.Scanner;
 public class Jogo {
 
     // Atributos
-    Lutador ryu;
-    Lutador ken;
-    Lutador chunLi;
-    Lutador blanka;
-    Lutador zangief;
-    Lutador dhalsim;
-
     Scanner teclado;
 
     // Construtor
     public Jogo() {
         teclado = new Scanner(System.in);
-
-        //                       nome       pais      estilo        golpe especial        soco chute esp def vel
-        ryu     = new Lutador("Ryu",     "Japao",  "Karate",     "Hadouken",            14, 22, 45, 5, 6);
-        ken     = new Lutador("Ken",     "EUA",    "Karate",     "Shoryuken",           16, 24, 48, 4, 7);
-        chunLi  = new Lutador("Chun-Li", "China",  "Kung Fu",    "Spinning Bird Kick",  13, 20, 42, 4, 9);
-        blanka  = new Lutador("Blanka",  "Brasil", "Selvagem",   "Electric Thunder",    17, 26, 50, 3, 6);
-        zangief = new Lutador("Zangief", "Russia", "Luta Livre", "Spinning Piledriver", 19, 30, 55, 7, 2);
-        dhalsim = new Lutador("Dhalsim", "India",  "Yoga",       "Yoga Flame",          14, 23, 46, 3, 8);
     }
 
     // Metodos
 
-    void abrirMenu() {
+    // O "throws Exception" e por causa do Thread.sleep, que da as pausas do jogo
+    void abrirMenu() throws Exception {
         boolean continuar = true;
 
         while (continuar) {
-            limparTela();
-            mostrarAbertura();
+            // Empurra a tela anterior para cima
+            for (int i = 0; i < 30; i++) {
+                System.out.println();
+            }
 
-            linhaDupla();
-            System.out.println("               M E N U   P R I N C I P A L");
-            linhaDupla();
+            System.out.println("   SSSSS TTTTT RRRR  EEEEE EEEEE TTTTT");
+            System.out.println("   S       T   R   R E     E       T");
+            System.out.println("   SSSSS   T   RRRR  EEEE  EEEE    T");
+            System.out.println("       S   T   R  R  E     E       T");
+            System.out.println("   SSSSS   T   R   R EEEEE EEEEE   T");
             System.out.println();
-            System.out.println("        [1]  Comecar a luta  (Jogador 1  vs  Jogador 2)");
-            System.out.println("        [2]  Ver ficha de um lutador");
-            System.out.println("        [3]  Sair");
+            System.out.println("   FFFFF IIIII  GGGG H   H TTTTT EEEEE RRRR");
+            System.out.println("   F       I   G     H   H   T   E     R   R");
+            System.out.println("   FFFF    I   G  GG HHHHH   T   EEEE  RRRR");
+            System.out.println("   F       I   G   G H   H   T   E     R  R");
+            System.out.println("   F     IIIII  GGGG H   H   T   EEEEE R   R");
             System.out.println();
-            linhaDupla();
-            System.out.print("        Escolha: ");
+            System.out.println("        j o g o   d e   l u t a   e m   j a v a");
+            System.out.println();
+            System.out.println("   =========== MENU PRINCIPAL ===========");
+            System.out.println("   [1] Comecar a luta (2 jogadores)");
+            System.out.println("   [2] Ver ficha de um lutador");
+            System.out.println("   [3] Sair");
+            System.out.println("   ======================================");
+            System.out.print("   Escolha: ");
 
             int opcao = teclado.nextInt();
 
             if (opcao == 1) {
-                jogar();
+                int numero1 = escolherLutador("JOGADOR 1");
+                int numero2 = escolherLutador("JOGADOR 2");
+
+                Lutador jogador1 = pegarLutador(numero1);
+                Lutador jogador2 = pegarLutador(numero2);
+
+                iniciarBatalha(jogador1, jogador2);
             } else if (opcao == 2) {
-                verFicha();
+                int numero = escolherLutador("VOCE");
+                Lutador lutador = pegarLutador(numero);
+
+                System.out.println();
+                System.out.println("   =========== FICHA DO LUTADOR ===========");
+                lutador.mostrarFicha();
+                System.out.println("   ========================================");
+                System.out.println();
+                System.out.print("   Digite 1 para voltar ao menu: ");
+                teclado.nextInt();
             } else if (opcao == 3) {
                 continuar = false;
-                mostrarDespedida();
+                System.out.println();
+                System.out.println("   Ate a proxima! Obrigado por jogar.");
+                System.out.println();
             } else {
-                System.out.println("        Opcao invalida.");
-                pausa(1200);
+                System.out.println("   Opcao invalida.");
+                Thread.sleep(1200);
             }
         }
     }
 
-    void jogar() {
-        int numero1 = escolherLutador("JOGADOR 1");
-        int numero2 = escolherLutador("JOGADOR 2");
-
-        Lutador jogador1 = pegarLutador(numero1);
-        Lutador jogador2 = pegarLutador(numero2);
-
-        iniciarBatalha(jogador1, jogador2);
-    }
-
-    // A luta e melhor de 3: acaba quando alguem vence 2 rounds
-    void iniciarBatalha(Lutador lutador1, Lutador lutador2) {
-        mostrarVersus(lutador1, lutador2);
-
-        int round = 1;
-
-        while (lutador1.roundsVencidos < 2 && lutador2.roundsVencidos < 2) {
-            // Os dois voltam com a vida cheia a cada round
-            lutador1.prepararParaNovoRound();
-            lutador2.prepararParaNovoRound();
-
-            mostrarAnuncioDeRound(round);
-            disputarRound(lutador1, lutador2);
-
-            // Quem sobrou de pe ganhou o round
-            if (lutador1.estaVivo()) {
-                lutador1.roundsVencidos = lutador1.roundsVencidos + 1;
-                mostrarFimDeRound(lutador1, lutador2);
-            } else {
-                lutador2.roundsVencidos = lutador2.roundsVencidos + 1;
-                mostrarFimDeRound(lutador2, lutador1);
-            }
-
-            round = round + 1;
-        }
-
-        if (lutador1.roundsVencidos == 2) {
-            mostrarVencedor(lutador1, lutador2);
-        } else {
-            mostrarVencedor(lutador2, lutador1);
-        }
-
-        voltarAoMenu();
-    }
-
-    // Um round vai ate a vida de um dos dois chegar a zero
-    void disputarRound(Lutador lutador1, Lutador lutador2) {
-        int turno = 1;
-
-        while (lutador1.estaVivo() && lutador2.estaVivo()) {
-            mostrarPlacar(lutador1, lutador2, turno);
-
-            // Quem tem mais velocidade ataca primeiro
-            if (lutador1.velocidade >= lutador2.velocidade) {
-                executarTurno(lutador1, lutador2);
-
-                if (lutador2.estaVivo() == false) {
-                    break;
-                }
-
-                executarTurno(lutador2, lutador1);
-            } else {
-                executarTurno(lutador2, lutador1);
-
-                if (lutador1.estaVivo() == false) {
-                    break;
-                }
-
-                executarTurno(lutador1, lutador2);
-            }
-
-            turno = turno + 1;
-        }
-    }
-
-    // Um turno so: o atacante escolhe uma acao e ela e executada
-    void executarTurno(Lutador atacante, Lutador defensor) {
-        atacante.limparEstado();
-
-        mostrarMenuDeAtaque(atacante);
-        int ataque = teclado.nextInt();
-
-        linhaSimples();
-
-        if (ataque == 1) {
-            atacante.socar(defensor);
-        } else if (ataque == 2) {
-            atacante.chutar(defensor);
-        } else if (ataque == 3) {
-            atacante.defender();
-        } else if (ataque == 4) {
-            atacante.provocar();
-        } else if (ataque == 5) {
-            atacante.especial(defensor);
-        } else {
-            System.out.println("        Opcao invalida, " + atacante.nome + " ficou parado.");
-        }
-
-        linhaSimples();
-        pausa(1500);
-    }
-
-    void mostrarMenuDeAtaque(Lutador lutador) {
-        System.out.println();
-        System.out.println("        >> Vez de " + lutador.nome + " <<");
-        System.out.println("        [1] Soco      [2] Chute     [3] Defender");
-        System.out.println("        [4] Provocar  [5] Especial (" + lutador.especial + ")");
-        System.out.print("        Escolha: ");
-    }
-
+    // Mostra a lista e pede um numero de 1 a 6.
+    // Os dois jogadores e a tela de ficha usam este mesmo metodo.
     int escolherLutador(String quemEscolhe) {
-        limparTela();
-        mostrarLista();
-        System.out.print("        " + quemEscolhe + ", escolha de 1 a 6: ");
+        for (int i = 0; i < 30; i++) {
+            System.out.println();
+        }
+
+        System.out.println("   =============== ESCOLHA SEU LUTADOR ===============");
+        System.out.println("   [1] Ryu       Japao    Karate       Hadouken");
+        System.out.println("   [2] Ken       EUA      Karate       Shoryuken");
+        System.out.println("   [3] Chun-Li   China    Kung Fu      Spinning Bird Kick");
+        System.out.println("   [4] Blanka    Brasil   Selvagem     Electric Thunder");
+        System.out.println("   [5] Zangief   Russia   Luta Livre   Spinning Piledriver");
+        System.out.println("   [6] Dhalsim   India    Yoga         Yoga Flame");
+        System.out.println("   ==================================================");
+        System.out.print("   " + quemEscolhe + ", escolha de 1 a 6: ");
+
         int numero = teclado.nextInt();
 
         while (numero < 1 || numero > 6) {
-            System.out.print("        Numero invalido. Escolha de 1 a 6: ");
+            System.out.print("   Numero invalido. Escolha de 1 a 6: ");
             numero = teclado.nextInt();
         }
 
         return numero;
     }
 
-    void verFicha() {
-        limparTela();
-        mostrarLista();
-        System.out.print("        Escolha o lutador: ");
-        int numero = teclado.nextInt();
-
-        while (numero < 1 || numero > 6) {
-            System.out.print("        Numero invalido. Escolha de 1 a 6: ");
-            numero = teclado.nextInt();
-        }
-
-        Lutador lutador = pegarLutador(numero);
-
-        limparTela();
-        System.out.println();
-        linhaDupla();
-        System.out.println("               F I C H A   D O   L U T A D O R");
-        linhaDupla();
-        System.out.println();
-        lutador.mostrarFicha();
-        System.out.println();
-        linhaDupla();
-
-        voltarAoMenu();
-    }
-
-    // Devolve uma copia do lutador escolhido (para os dois jogadores
-    // poderem pegar o mesmo personagem sem dividirem a mesma barra de vida)
+    // Cria o objeto do lutador que foi escolhido.
+    // Como cria um lutador novo a cada chamada, os dois jogadores podem
+    // escolher o mesmo personagem sem dividirem a mesma barra de vida.
     Lutador pegarLutador(int numero) {
+        //                            nome       pais      estilo        golpe especial        soco chute esp def vel
         if (numero == 1) {
-            return ryu.clonar();
+            return new Lutador("Ryu",     "Japao",  "Karate",     "Hadouken",            14, 22, 45, 5, 6);
         } else if (numero == 2) {
-            return ken.clonar();
+            return new Lutador("Ken",     "EUA",    "Karate",     "Shoryuken",           16, 24, 48, 4, 7);
         } else if (numero == 3) {
-            return chunLi.clonar();
+            return new Lutador("Chun-Li", "China",  "Kung Fu",    "Spinning Bird Kick",  13, 20, 42, 4, 9);
         } else if (numero == 4) {
-            return blanka.clonar();
+            return new Lutador("Blanka",  "Brasil", "Selvagem",   "Electric Thunder",    17, 26, 50, 3, 6);
         } else if (numero == 5) {
-            return zangief.clonar();
+            return new Lutador("Zangief", "Russia", "Luta Livre", "Spinning Piledriver", 19, 30, 55, 7, 2);
         }
-        return dhalsim.clonar();
+        return new Lutador("Dhalsim", "India",  "Yoga",       "Yoga Flame",          14, 23, 46, 3, 8);
     }
 
-    void mostrarLista() {
-        System.out.println();
-        linhaDupla();
-        System.out.println("               E S C O L H A   S E U   L U T A D O R");
-        linhaDupla();
-        System.out.println("        #   LUTADOR     PAIS     ESTILO       SOC CHU ESP DEF VEL");
-        linhaSimples();
-        ryu.mostrarNaLista(1);
-        ken.mostrarNaLista(2);
-        chunLi.mostrarNaLista(3);
-        blanka.mostrarNaLista(4);
-        zangief.mostrarNaLista(5);
-        dhalsim.mostrarNaLista(6);
-        linhaDupla();
-        System.out.println();
-    }
-
-    void mostrarAbertura() {
-        System.out.println();
-        System.out.println("        SSSSS TTTTT RRRR  EEEEE EEEEE TTTTT");
-        System.out.println("        S       T   R   R E     E       T");
-        System.out.println("        SSSSS   T   RRRR  EEEE  EEEE    T");
-        System.out.println("            S   T   R  R  E     E       T");
-        System.out.println("        SSSSS   T   R   R EEEEE EEEEE   T");
-        System.out.println();
-        System.out.println("        FFFFF IIIII  GGGG H   H TTTTT EEEEE RRRR");
-        System.out.println("        F       I   G     H   H   T   E     R   R");
-        System.out.println("        FFFF    I   G  GG HHHHH   T   EEEE  RRRR");
-        System.out.println("        F       I   G   G H   H   T   E     R  R");
-        System.out.println("        F     IIIII  GGGG H   H   T   EEEEE R   R");
-        System.out.println();
-        System.out.println("             j o g o   d e   l u t a   e m   j a v a");
-        System.out.println();
-    }
-
-    void mostrarVersus(Lutador lutador1, Lutador lutador2) {
-        limparTela();
-        System.out.println();
-        linhaDupla();
-        System.out.println();
-        System.out.println("             " + completar(lutador1.nome, 15) + "  VS  " + lutador2.nome);
-        System.out.println();
-        linhaSimples();
-        System.out.println("        PAIS       " + completar(lutador1.pais, 22) + "  " + lutador2.pais);
-        System.out.println("        ESTILO     " + completar(lutador1.estilo, 22) + "  " + lutador2.estilo);
-        System.out.println("        ESPECIAL   " + completar(lutador1.especial, 22) + "  " + lutador2.especial);
-        linhaSimples();
-        System.out.println();
-        System.out.println("                    M E L H O R   D E   3   R O U N D S");
-        System.out.println();
-        linhaDupla();
-        pausa(2500);
-    }
-
-    void mostrarAnuncioDeRound(int round) {
-        System.out.println();
-        linhaDupla();
-        System.out.println("                        R O U N D   " + round);
-        System.out.println("                          L U T E M !");
-        linhaDupla();
-        pausa(1500);
-    }
-
-    void mostrarPlacar(Lutador lutador1, Lutador lutador2, int turno) {
-        System.out.println();
-        linhaDupla();
-        System.out.println("        TURNO " + turno + "     PLACAR:  "
-                + lutador1.nome + " " + lutador1.roundsVencidos
-                + "  x  " + lutador2.roundsVencidos + " " + lutador2.nome);
-        linhaSimples();
-        mostrarBarra(lutador1);
-        mostrarBarra(lutador2);
-        linhaDupla();
-    }
-
-    // Desenha a barra de vida com # e .
-    void mostrarBarra(Lutador lutador) {
-        int blocos = lutador.vida / 5; // 100 de vida viram 20 blocos
-        String barra = "";
-
-        for (int i = 0; i < 20; i++) {
-            if (i < blocos) {
-                barra = barra + "#";
-            } else {
-                barra = barra + ".";
-            }
-        }
-
-        System.out.println("        " + completar(lutador.nome, 10) + "[" + barra + "]  " + lutador.vida + "/100");
-    }
-
-    void mostrarFimDeRound(Lutador vencedor, Lutador perdedor) {
-        System.out.println();
-        linhaDupla();
-        System.out.println("        K . O . !   " + vencedor.nome + " venceu o round.");
-        System.out.println("        PLACAR:  " + vencedor.nome + " " + vencedor.roundsVencidos
-                + "  x  " + perdedor.roundsVencidos + " " + perdedor.nome);
-        linhaDupla();
-        pausa(2500);
-    }
-
-    void mostrarVencedor(Lutador vencedor, Lutador perdedor) {
-        limparTela();
-        System.out.println();
-        linhaDupla();
-        System.out.println("                    F I M   D A   L U T A");
-        linhaDupla();
-        System.out.println();
-        System.out.println("             " + vencedor.nome + " VENCEU A LUTA!");
-        System.out.println();
-        System.out.println("             Placar final:  " + vencedor.roundsVencidos
-                + "  x  " + perdedor.roundsVencidos);
-        System.out.println("             " + perdedor.nome + " nao aguentou.");
-        System.out.println();
-        linhaDupla();
-    }
-
-    void mostrarDespedida() {
-        limparTela();
-        System.out.println();
-        linhaDupla();
-        System.out.println("        Ate a proxima! Obrigado por jogar.");
-        linhaDupla();
-        System.out.println();
-    }
-
-    // Coloca espacos no fim do texto ate ele ficar do tamanho pedido,
-    // para as colunas ficarem alinhadas
-    String completar(String texto, int tamanho) {
-        String resultado = texto;
-
-        while (resultado.length() < tamanho) {
-            resultado = resultado + " ";
-        }
-
-        return resultado;
-    }
-
-    void linhaSimples() {
-        System.out.println("        ----------------------------------------------------------");
-    }
-
-    void linhaDupla() {
-        System.out.println("        ==========================================================");
-    }
-
-    void voltarAoMenu() {
-        System.out.println();
-        System.out.print("        Digite 1 para voltar ao menu: ");
-        teclado.nextInt();
-    }
-
-    void limparTela() {
+    // A luta e melhor de 3: acaba quando alguem vence 2 rounds
+    void iniciarBatalha(Lutador lutador1, Lutador lutador2) throws Exception {
         for (int i = 0; i < 30; i++) {
             System.out.println();
         }
+
+        System.out.println("   ================================================");
+        System.out.println("   " + lutador1.nome + " - " + lutador1.pais + " - " + lutador1.estilo);
+        System.out.println("   Golpe especial: " + lutador1.especial);
+        System.out.println();
+        System.out.println("                      V S");
+        System.out.println();
+        System.out.println("   " + lutador2.nome + " - " + lutador2.pais + " - " + lutador2.estilo);
+        System.out.println("   Golpe especial: " + lutador2.especial);
+        System.out.println("   ================================================");
+        System.out.println("   Melhor de 3 rounds. Quem vencer 2 leva a luta.");
+        Thread.sleep(2500);
+
+        int round = 1;
+
+        while (lutador1.roundsVencidos < 2 && lutador2.roundsVencidos < 2) {
+            // Os dois voltam com a vida cheia e a guarda limpa a cada round
+            lutador1.vida = 100;
+            lutador1.defendendo = false;
+            lutador1.guardaAberta = false;
+
+            lutador2.vida = 100;
+            lutador2.defendendo = false;
+            lutador2.guardaAberta = false;
+
+            System.out.println();
+            System.out.println("   =========== ROUND " + round + " - LUTEM! ===========");
+            Thread.sleep(1500);
+
+            disputarRound(lutador1, lutador2);
+
+            // Quem sobrou de pe ganhou o round
+            System.out.println();
+            System.out.println("   =============== K . O . ! ===============");
+
+            if (lutador1.vida > 0) {
+                lutador1.roundsVencidos = lutador1.roundsVencidos + 1;
+                System.out.println("   " + lutador1.nome + " venceu o round " + round + "!");
+            } else {
+                lutador2.roundsVencidos = lutador2.roundsVencidos + 1;
+                System.out.println("   " + lutador2.nome + " venceu o round " + round + "!");
+            }
+
+            System.out.println("   Placar: " + lutador1.nome + " " + lutador1.roundsVencidos + " x " + lutador2.roundsVencidos + " " + lutador2.nome);
+            System.out.println("   =========================================");
+            Thread.sleep(2500);
+
+            round = round + 1;
+        }
+
+        System.out.println();
+        System.out.println("   =========== FIM DA LUTA ===========");
+
+        if (lutador1.roundsVencidos == 2) {
+            System.out.println("   " + lutador1.nome + " VENCEU A LUTA!");
+            System.out.println("   " + lutador2.nome + " nao aguentou.");
+        } else {
+            System.out.println("   " + lutador2.nome + " VENCEU A LUTA!");
+            System.out.println("   " + lutador1.nome + " nao aguentou.");
+        }
+
+        System.out.println("   Placar final: " + lutador1.roundsVencidos + " x " + lutador2.roundsVencidos);
+        System.out.println("   ===================================");
+        System.out.println();
+        System.out.print("   Digite 1 para voltar ao menu: ");
+        teclado.nextInt();
     }
 
-    void pausa(int milissegundos) {
-        // O try/catch aqui e obrigatorio, o Java nao deixa usar Thread.sleep sem ele
-        try {
-            Thread.sleep(milissegundos);
-        } catch (InterruptedException e) {
-            System.out.println("        Erro de pausa.");
+    // Um round vai ate a vida de um dos dois chegar a zero
+    void disputarRound(Lutador lutador1, Lutador lutador2) throws Exception {
+        int turno = 1;
+
+        while (lutador1.vida > 0 && lutador2.vida > 0) {
+            System.out.println();
+            System.out.println("   --------------- TURNO " + turno + " ---------------");
+            lutador1.mostrarBarra();
+            lutador2.mostrarBarra();
+            System.out.println("   Rounds vencidos: " + lutador1.nome + " " + lutador1.roundsVencidos + " x " + lutador2.roundsVencidos + " " + lutador2.nome);
+            System.out.println("   ------------------------------------------");
+
+            // Quem tem mais velocidade ataca primeiro
+            if (lutador1.velocidade >= lutador2.velocidade) {
+                executarTurno(lutador1, lutador2);
+
+                if (lutador2.vida > 0) {
+                    executarTurno(lutador2, lutador1);
+                }
+            } else {
+                executarTurno(lutador2, lutador1);
+
+                if (lutador1.vida > 0) {
+                    executarTurno(lutador1, lutador2);
+                }
+            }
+
+            turno = turno + 1;
         }
+    }
+
+    // Um turno so: o jogador escolhe uma acao e ela e executada
+    void executarTurno(Lutador atacante, Lutador defensor) throws Exception {
+        // A guarda levantada e a guarda aberta valem so ate o lutador agir de novo
+        atacante.defendendo = false;
+        atacante.guardaAberta = false;
+
+        System.out.println();
+        System.out.println("   Vez de " + atacante.nome);
+        System.out.println("   [1] Soco      [2] Chute     [3] Defender");
+        System.out.println("   [4] Provocar  [5] " + atacante.especial);
+        System.out.print("   Escolha: ");
+
+        int acao = teclado.nextInt();
+        System.out.println();
+
+        if (acao == 1) {
+            atacante.socar(defensor);
+        } else if (acao == 2) {
+            atacante.chutar(defensor);
+        } else if (acao == 3) {
+            atacante.defender();
+        } else if (acao == 4) {
+            atacante.provocar();
+        } else if (acao == 5) {
+            atacante.especial(defensor);
+        } else {
+            System.out.println("   Opcao invalida, " + atacante.nome + " ficou parado.");
+        }
+
+        Thread.sleep(1500);
     }
 }

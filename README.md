@@ -17,7 +17,7 @@ javac -d bin src/*.java
 java -cp bin App
 ```
 
-A tela usa só caracteres comuns do teclado (`#`, `.`, `-`, `=`, `+`, `|`),
+A tela usa só caracteres comuns do teclado (`#`, `.`, `-`, `=`, `[`, `]`),
 então fica igual em qualquer terminal: `cmd`, PowerShell, VS Code ou IntelliJ.
 
 ## As classes do projeto
@@ -27,28 +27,54 @@ eram nos exercícios da aula.
 
 | Classe | O que ela é |
 |---|---|
-| `Lutador` | **O personagem.** Tem os atributos (nome, vida, dano dos golpes...), o construtor e os métodos (`socar`, `chutar`, `defender`, `provocar`, `especial`, `mostrarFicha`). |
-| `Jogo` | **O jogo.** Guarda os seis lutadores, mostra o menu, deixa escolher o personagem e controla os rounds e os turnos da luta. |
+| `Lutador` | **O personagem.** Tem os atributos (nome, vida, dano dos golpes...), o construtor e os métodos (`socar`, `chutar`, `defender`, `provocar`, `especial`, `mostrarBarra`, `mostrarFicha`). |
+| `Jogo` | **O jogo.** Mostra o menu, deixa escolher o personagem e controla os rounds e os turnos da luta. |
 | `App` | Classe principal com o `main`. Só cria o objeto `Jogo` e manda ele abrir o menu. |
 
 O `App` ficou igual ao das aulas: cria um objeto e chama um método dele.
 
 ```java
 public class App {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+
         Jogo jogo = new Jogo();
         jogo.abrirMenu();
+
     }
 }
 ```
 
-## Menu principal
+O `throws Exception` é o mesmo do `App` da aula. Ele está aí por causa do
+`Thread.sleep`, que dá as pausas entre um golpe e outro — sem ele o Java
+obrigaria a escrever um `try/catch` em volta de cada pausa.
 
-O jogo abre com três opções, controladas por `if/else if` dentro do `abrirMenu`:
+## Os métodos
 
-1. **Começar a luta (Jogador 1 vs Jogador 2)**
-2. **Ver ficha de um lutador**
-3. **Sair**
+O projeto tem poucos métodos de propósito: só existe método para o que tem
+lógica própria (um laço, uma conta, uma decisão) e é usado em mais de um lugar.
+As mensagens de tela são `System.out.println` escritos no meio do código que
+faz o trabalho, igual aos `System.out.println("=========== Dados iniciais ===========")`
+dos exercícios de aula.
+
+**Na classe `Lutador`:**
+
+| Método | O que faz |
+|---|---|
+| `socar`, `chutar`, `defender`, `provocar`, `especial` | As cinco ações do lutador. As três que causam dano recebem o adversário como parâmetro, igual ao `atacarOutroPersonagem` da aula. |
+| `receberDano` | Faz a conta do dano (defesa, guarda levantada, guarda aberta) e devolve um `int` com quanto de vida foi perdido. Existe porque os três golpes usam a mesma conta. |
+| `mostrarBarra` | Desenha a barra de vida com um `for` de 20 voltas. |
+| `mostrarFicha` | Mostra todos os dados do lutador, igual ao `pokedex()` do exercício do Pokémon. |
+
+**Na classe `Jogo`:**
+
+| Método | O que faz |
+|---|---|
+| `abrirMenu` | O `while` do menu principal, com a abertura desenhada e as três opções. |
+| `escolherLutador` | Mostra a lista e pede um número de 1 a 6, repetindo enquanto o número for inválido. É usado três vezes (jogador 1, jogador 2 e a tela de ficha). |
+| `pegarLutador` | Cria com `new` o objeto do lutador escolhido. |
+| `iniciarBatalha` | O `while` que conta os rounds até alguém vencer 2. |
+| `disputarRound` | O `while` que conta os turnos até a vida de um dos dois chegar a zero. |
+| `executarTurno` | Mostra as opções de golpe e executa a escolhida. |
 
 ## Regras da luta
 
@@ -93,29 +119,26 @@ Outros detalhes:
 Não tem biblioteca nenhuma, é tudo `System.out.println`:
 
 - O nome **STREET FIGHTER** é desenhado com as próprias letras, uma linha de
-  `println` por vez, no método `mostrarAbertura`.
-- As **bordas** das telas são feitas com duas linhas prontas: `linhaDupla`
-  (com `=`) para separar as telas importantes, e `linhaSimples` (com `-`)
-  para separar seções dentro da mesma tela.
+  `println` por vez, dentro do `abrirMenu`.
+- As **molduras** são `System.out.println` com `=` e `-`, escritos no lugar
+  onde a mensagem aparece.
 - A **barra de vida** é montada com um `for` que roda 20 vezes no método
   `mostrarBarra`. Cada volta acrescenta um `#` se aquele pedaço ainda tem vida,
   ou um `.` se não tem. Como a vida vai de 0 a 100, basta dividir por 5 para
-  saber quantos `#` desenhar.
-- O **placar** aparece em cima da barra de vida a cada turno, mostrando os
-  rounds vencidos pelos dois lutadores.
-- O método `completar` acrescenta espaços no fim de um texto até ele ficar do
-  tamanho pedido. É isso que deixa as colunas da tabela de lutadores alinhadas
-  e a tela de **VS** com os dois lados no mesmo lugar.
-- O `Thread.sleep` dentro do método `pausa` segura a tela por alguns instantes
-  entre um golpe e outro, para dar tempo de ler o que aconteceu.
-- O `limparTela` só imprime 30 linhas em branco para empurrar a tela anterior
-  para cima.
+  saber quantos `#` desenhar. O nome fica numa linha e a barra na linha de
+  baixo, e é por isso que as barras dos dois lutadores sempre começam na mesma
+  coluna, sem precisar acertar espaço nenhum.
+- O `Thread.sleep` segura a tela por alguns instantes entre um golpe e outro,
+  para dar tempo de ler o que aconteceu.
+- Para limpar a tela é só um `for` que imprime 30 linhas em branco, empurrando
+  a tela anterior para cima.
 
 ## Conceitos de POO usados (para explicar na apresentação)
 
 - **Classe e objeto**: `Lutador` é a classe (a "forma"); `new Lutador("Ryu", ...)`
   cria um objeto, um lutador de verdade com os dados dele.
-- **Atributos**: as características de cada objeto (`nome`, `vida`, `danoSoco`...).
+- **Atributos**: as características de cada objeto (`nome`, `vida`, `danoSoco`...),
+  todos de tipo simples (`String`, `int`, `boolean`).
 - **Construtor**: `public Lutador(...)` define como um lutador nasce. Todo
   lutador já começa com 100 de vida, isso está escrito no construtor. É lá
   também que entra o dano dos golpes de cada personagem.
@@ -123,27 +146,26 @@ Não tem biblioteca nenhuma, é tudo `System.out.println`:
 - **Um objeto agindo sobre outro**: `ryu.socar(ken)` — o método recebe outro
   `Lutador` como parâmetro e mexe na vida dele, igualzinho ao exercício do
   `atacarOutroPersonagem`.
-- **Vários objetos da mesma classe**: o `Jogo` cria seis `Lutador`, cada um
-  na sua variável (`ryu`, `ken`, `chunLi`...), igual aos três pokémons da aula.
+- **Mexer no atributo de outro objeto**: no começo do turno o jogo faz
+  `atacante.defendendo = false;`, do mesmo jeito que a aula fazia
+  `inimigo.vida = inimigo.vida - 10;`.
 - **`this`**: usado dentro da classe para deixar claro que estamos falando do
   atributo daquele objeto, e não de uma variável qualquer.
-- **Cópia de objeto**: o método `clonar()` existe porque, sem ele, dois
-  jogadores escolhendo o mesmo personagem estariam mexendo no MESMO objeto e
-  dividindo a mesma barra de vida.
+- **Objeto criado na hora**: o `pegarLutador` usa `new Lutador(...)` toda vez
+  que alguém escolhe. É por isso que os dois jogadores podem pegar o mesmo
+  personagem sem dividirem a mesma barra de vida — são dois objetos diferentes.
 - **Um `while` dentro do outro**: o `iniciarBatalha` tem um `while` que conta
   os rounds (`while (lutador1.roundsVencidos < 2 && ...)`) e, dentro do
   `disputarRound`, outro `while` que conta os turnos daquele round. É o mesmo
   `while` da aula, só que um dentro do outro.
 - **Método que devolve valor**: quase todos os métodos são `void`, mas
-  `receberDano` devolve um `int` (quanto de vida foi perdido) e `estaVivo`
-  devolve um `boolean`. Serve para mostrar a diferença entre os dois tipos.
+  `receberDano` devolve um `int` (quanto de vida foi perdido) e `pegarLutador`
+  devolve um `Lutador`. Serve para mostrar a diferença entre os dois tipos.
 
 ## Ideias para aumentar o projeto depois
 
-- Mais lutadores (criar outro `Lutador` no construtor do `Jogo` e acrescentar
-  ele no `pegarLutador` e no `mostrarLista`).
+- Mais lutadores (acrescentar um `else if` no `pegarLutador` e uma linha na
+  lista do `escolherLutador`).
 - Limitar o golpe especial a um uso por round, com um atributo `int` contando.
 - Um segundo golpe especial por personagem.
 - Um cenário que mude alguma regra da luta.
-- Voltar o modo contra o computador (era um método a mais no `Jogo` que
-  decidia a ação com três `if`).
