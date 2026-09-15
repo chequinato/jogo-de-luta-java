@@ -5,20 +5,15 @@ public class Lutador {
     String pais;
     String estilo;
     String especial;
-
     int vida;
     int danoSoco;
     int danoChute;
     int danoEspecial;
-    int defesa;
-    int velocidade;
     int roundsVencidos;
-
-    boolean defendendo;   // levantou a guarda, entao sofre metade do dano
-    boolean guardaAberta; // se expos, entao sofre 50% a mais de dano
+    boolean defendendo; // quando esta com a guarda levantada, sofre metade do dano
 
     // Construtor
-    public Lutador(String nome, String pais, String estilo, String especial, int danoSoco, int danoChute, int danoEspecial, int defesa, int velocidade) {
+    public Lutador(String nome, String pais, String estilo, String especial, int danoSoco, int danoChute, int danoEspecial) {
         this.nome = nome;
         this.pais = pais;
         this.estilo = estilo;
@@ -26,74 +21,65 @@ public class Lutador {
         this.danoSoco = danoSoco;
         this.danoChute = danoChute;
         this.danoEspecial = danoEspecial;
-        this.defesa = defesa;
-        this.velocidade = velocidade;
-
-        // Todo lutador comeca com 100 de vida e sem nenhum round vencido
-        this.vida = 100;
+        this.vida = 100; // todo lutador comeca a luta com 100 de vida
         this.roundsVencidos = 0;
         this.defendendo = false;
-        this.guardaAberta = false;
     }
 
     // Metodos
 
+    // Tira a vida do inimigo, do mesmo jeito que a aula fazia com inimigo.vida = inimigo.vida - 10
     void socar(Lutador inimigo) {
-        int dano = inimigo.receberDano(this.danoSoco, false);
+        int dano = this.danoSoco;
+
+        // se o inimigo levantou a guarda, o golpe tira so a metade
+        if (inimigo.defendendo) {
+            dano = dano / 2;
+        }
+
+        inimigo.vida = inimigo.vida - dano;
+
+        // a vida nao pode ficar negativa
+        if (inimigo.vida < 0) {
+            inimigo.vida = 0;
+        }
+
         System.out.println("   " + this.nome + " deu um SOCO e tirou " + dano + " de vida de " + inimigo.nome + ".");
     }
 
+    // O chute e igual ao soco, so que usa o dano do chute, que e maior
     void chutar(Lutador inimigo) {
-        this.guardaAberta = true; // para girar o corpo ele se expoe
-        int dano = inimigo.receberDano(this.danoChute, false);
+        int dano = this.danoChute;
+
+        if (inimigo.defendendo) {
+            dano = dano / 2;
+        }
+
+        inimigo.vida = inimigo.vida - dano;
+
+        if (inimigo.vida < 0) {
+            inimigo.vida = 0;
+        }
+
         System.out.println("   " + this.nome + " deu um CHUTE e tirou " + dano + " de vida de " + inimigo.nome + ".");
-        System.out.println("   So que " + this.nome + " abriu a guarda no chute.");
     }
 
+    // O golpe especial e o mais forte e passa por cima da guarda
+    void golpeEspecial(Lutador inimigo) {
+        inimigo.vida = inimigo.vida - this.danoEspecial;
+
+        if (inimigo.vida < 0) {
+            inimigo.vida = 0;
+        }
+
+        System.out.println("   " + this.nome + " usou " + this.especial + "!");
+        System.out.println("   O golpe passou pela guarda e tirou " + this.danoEspecial + " de vida de " + inimigo.nome + ".");
+    }
+
+    // Levanta a guarda. Quem ataca olha este atributo para saber se o dano cai pela metade
     void defender() {
         this.defendendo = true;
         System.out.println("   " + this.nome + " levantou a guarda e vai sofrer metade do dano.");
-    }
-
-    void provocar() {
-        this.guardaAberta = true;
-        System.out.println("   " + this.nome + " provocou o adversario e abriu a guarda.");
-    }
-
-    void especial(Lutador inimigo) {
-        int dano = inimigo.receberDano(this.danoEspecial, true);
-        System.out.println("   " + this.nome + " usou " + this.especial + "!");
-        System.out.println("   O golpe passou pela defesa e tirou " + dano + " de vida de " + inimigo.nome + ".");
-    }
-
-    // Desconta o dano da vida deste lutador e devolve quanto ele perdeu.
-    // Os tres golpes de cima usam este metodo, por isso ele existe.
-    int receberDano(int dano, boolean passaPelaDefesa) {
-        int danoFinal = dano;
-
-        if (passaPelaDefesa == false) {
-            danoFinal = danoFinal - this.defesa;
-        }
-
-        if (this.defendendo) {
-            danoFinal = danoFinal / 2;
-        }
-
-        if (this.guardaAberta) {
-            danoFinal = danoFinal + (danoFinal / 2);
-        }
-
-        if (danoFinal < 1) {
-            danoFinal = 1; // todo golpe tira pelo menos 1
-        }
-
-        this.vida = this.vida - danoFinal;
-
-        if (this.vida < 0) {
-            this.vida = 0;
-        }
-
-        return danoFinal;
     }
 
     // Desenha a barra de vida com # e . usando um for de 20 voltas
@@ -113,6 +99,7 @@ public class Lutador {
         System.out.println("   [" + barra + "]");
     }
 
+    // Mostra os dados do lutador, igual ao pokedex() do exercicio do Pokemon
     void mostrarFicha() {
         System.out.println("   Nome ......: " + this.nome);
         System.out.println("   Pais ......: " + this.pais);
@@ -120,9 +107,7 @@ public class Lutador {
         System.out.println("   Especial ..: " + this.especial);
         System.out.println("   Soco ......: " + this.danoSoco);
         System.out.println("   Chute .....: " + this.danoChute);
-        System.out.println("   Dano esp ..: " + this.danoEspecial + " (passa pela defesa)");
-        System.out.println("   Defesa ....: " + this.defesa);
-        System.out.println("   Velocidade : " + this.velocidade);
+        System.out.println("   Dano esp ..: " + this.danoEspecial);
         System.out.println("   Vida ......: " + this.vida);
     }
 }
