@@ -33,7 +33,7 @@ eram nos exercícios da aula.
 | Classe | O que ela é |
 |---|---|
 | `Lutador` | **O personagem.** Tem os atributos (nome, vida, dano dos golpes...), o construtor e os métodos (`socar`, `chutar`, `golpeEspecial`, `defender`, `mostrarBarra`, `mostrarFicha`). |
-| `Jogo` | **O jogo.** Mostra o menu, deixa escolher o personagem e controla os rounds e os turnos da luta. |
+| `Jogo` | **O jogo.** Mostra o menu, deixa escolher o personagem e controla os rounds e as vezes de cada jogador. |
 | `App` | Classe principal com o `main`. Só cria o objeto `Jogo` e manda ele abrir o menu. |
 
 O `App` ficou igual ao das aulas: cria um objeto e chama um método dele.
@@ -72,8 +72,9 @@ dos exercícios de aula.
 |---|---|
 | `abrirMenu` | O `while` do menu principal, com a abertura desenhada e as três opções. |
 | `escolherLutador` | Mostra a lista, pede um número de 1 a 6 repetindo enquanto for inválido, e devolve o `Lutador` criado com `new`. É usado três vezes (jogador 1, jogador 2 e a tela de ficha). |
-| `iniciarBatalha` | Um `while` conta os rounds até alguém vencer 2 e, dentro dele, outro `while` conta os turnos até a vida de um dos dois chegar a zero. |
-| `executarTurno` | Mostra as opções de golpe e executa a escolhida. |
+| `iniciarBatalha` | A luta inteira: apresenta os dois lutadores, e um `while` chama um round atrás do outro até alguém vencer 2. No fim mostra quem ganhou. |
+| `jogarRound` | Um round só: devolve os dois para 100 de vida e roda o `while` dos turnos até a vida de um deles chegar a zero. No fim conta o round para quem sobrou de pé. |
+| `jogarVez` | A vez de um lutador: mostra as quatro ações, pede uma (repetindo enquanto for inválida) e executa a escolhida. |
 
 ## Regras da luta
 
@@ -94,7 +95,10 @@ Outros detalhes:
 
 - **Nada é sorteado.** O dano de cada golpe já vem definido no construtor do
   lutador, então o mesmo golpe sempre tira o mesmo tanto de vida.
-- A guarda levantada vale só até aquele lutador jogar de novo.
+- A guarda levantada vale só até aquele lutador jogar de novo: a primeira linha
+  do `jogarVez` é `atacante.defendendo = false`.
+- Se você digitar um número que não existe, o jogo pede de novo em vez de
+  passar a vez.
 - A vida nunca fica negativa: quando passa de zero, ela é acertada para zero.
 - No começo de cada round os dois voltam com a vida cheia e a guarda baixada,
   mas os rounds já vencidos continuam contados.
@@ -115,11 +119,12 @@ Outros detalhes:
 Não tem biblioteca nenhuma, é tudo `System.out.println`:
 
 - O nome **STREET FIGHTER** é desenhado com as próprias letras, uma linha de
-  `println` por vez, dentro do `abrirMenu`.
+  `println` por vez, no começo do `abrirMenu` — antes do `while`, para aparecer
+  uma vez só quando o jogo abre.
 - As **molduras** são `System.out.println` com `=` e `-`, escritos no lugar
   onde a mensagem aparece.
-- A **barra de vida** é montada com um `for` que roda 20 vezes no método
-  `mostrarBarra`. Cada volta acrescenta um `#` se aquele pedaço ainda tem vida,
+- A **barra de vida** é desenhada com um `for` que roda 20 vezes no método
+  `mostrarBarra`. Cada volta escreve um `#` se aquele pedaço ainda tem vida,
   ou um `.` se não tem. Como a vida vai de 0 a 100, basta dividir por 5 para
   saber quantos `#` desenhar. O nome fica numa linha e a barra na linha de
   baixo, e é por isso que as barras dos dois lutadores sempre começam na mesma
@@ -146,9 +151,12 @@ Não tem biblioteca nenhuma, é tudo `System.out.println`:
 - **Objeto criado na hora**: o `escolherLutador` usa `new Lutador(...)` toda vez
   que alguém escolhe. É por isso que os dois jogadores podem pegar o mesmo
   personagem sem dividirem a mesma barra de vida — são dois objetos diferentes.
-- **Um `while` dentro do outro**: no `iniciarBatalha` um `while` conta os rounds
-  (`while (lutador1.roundsVencidos < 2 && ...)`) e dentro dele outro `while`
-  conta os turnos. É o mesmo `while` da aula, só que um dentro do outro.
+- **Um método chamando outro**: o `iniciarBatalha` tem um `while` que conta os
+  rounds (`while (lutador1.roundsVencidos < 2 && ...)`) e, a cada volta, chama
+  o `jogarRound`. Dentro do `jogarRound` tem outro `while`, que conta os turnos,
+  e ele chama o `jogarVez` uma vez para cada jogador. Assim cada `while` fica
+  num método só e dá para ler um de cada vez, em vez de três laços empilhados
+  no mesmo lugar.
 - **Método que devolve valor**: quase todos os métodos são `void`, mas o
   `escolherLutador` devolve um `Lutador`. Serve para mostrar a diferença entre
   um método que só faz uma coisa e um que entrega um valor de volta.

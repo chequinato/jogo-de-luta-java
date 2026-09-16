@@ -85,18 +85,19 @@ public class Lutador {
     // Desenha a barra de vida com # e . usando um for de 20 voltas
     void mostrarBarra() {
         int blocos = this.vida / 5; // 100 de vida viram 20 blocos
-        String barra = "";
+
+        System.out.println("   " + this.nome + " - " + this.vida + " de vida");
+        System.out.print("   [");
 
         for (int i = 0; i < 20; i++) {
             if (i < blocos) {
-                barra = barra + "#";
+                System.out.print("#");
             } else {
-                barra = barra + ".";
+                System.out.print(".");
             }
         }
 
-        System.out.println("   " + this.nome + " - " + this.vida + " de vida");
-        System.out.println("   [" + barra + "]");
+        System.out.println("]");
     }
 
     // Mostra os dados do lutador, igual ao pokedex() do exercicio do Pokemon
