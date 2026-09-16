@@ -27,7 +27,7 @@ public class Jogo {
         System.out.println("   F       I   G   G H   H   T   E     R  R");
         System.out.println("   F     IIIII  GGGG H   H   T   EEEEE R   R");
         System.out.println();
-        System.out.println("        j o g o   d e   l u t a   e m   j a v a");
+        System.out.println("Jogo de Luta em Java Street Fighter");
 
         boolean continuar = true;
 
@@ -138,10 +138,10 @@ public class Jogo {
 
         if (lutador1.roundsVencidos == 2) {
             System.out.println("   " + lutador1.nome + " VENCEU A LUTA!");
-            System.out.println("   " + lutador2.nome + " nao aguentou.");
+            System.out.println("   " + lutador2.nome + " não aguentou.");
         } else {
             System.out.println("   " + lutador2.nome + " VENCEU A LUTA!");
-            System.out.println("   " + lutador1.nome + " nao aguentou.");
+            System.out.println("   " + lutador1.nome + " não aguentou.");
         }
 
         System.out.println("   Placar final: " + lutador1.roundsVencidos + " x " + lutador2.roundsVencidos);
@@ -164,8 +164,8 @@ public class Jogo {
         while (lutador1.vida > 0 && lutador2.vida > 0) {
             System.out.println();
             System.out.println("   --------------- TURNO " + turno + " ---------------");
-            lutador1.mostrarBarra();
-            lutador2.mostrarBarra();
+            System.out.println("   " + lutador1.nome + " - " + lutador1.vida + " de vida");
+            System.out.println("   " + lutador2.nome + " - " + lutador2.vida + " de vida");
             System.out.println("   ------------------------------------------");
 
             jogarVez(lutador1, lutador2);

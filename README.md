@@ -6,8 +6,7 @@ mesmo teclado** escolhem um lutador cada e se enfrentam em uma luta de
 luta quem ganhar 2 rounds.
 
 O projeto usa só o que foi visto em aula: **atributos, construtor, métodos,
-`this`, `if`, `while`, `for` e um objeto recebendo outro objeto como
-parâmetro**. Não tem nada além disso — sem biblioteca, sem sorteio, sem
+`this`, `if`, `while` e um objeto recebendo outro objeto como parâmetro**. Não tem nada além disso — sem biblioteca, sem sorteio, sem
 tratamento de erro e sem truque de terminal.
 
 ## Como rodar
@@ -22,7 +21,7 @@ javac -d bin src/*.java
 java -cp bin App
 ```
 
-A tela usa só caracteres comuns do teclado (`#`, `.`, `-`, `=`, `[`, `]`),
+A tela usa só caracteres comuns do teclado (`-`, `=`, `[`, `]`),
 então fica igual em qualquer terminal: `cmd`, PowerShell, VS Code ou IntelliJ.
 
 ## As classes do projeto
@@ -32,7 +31,7 @@ eram nos exercícios da aula.
 
 | Classe | O que ela é |
 |---|---|
-| `Lutador` | **O personagem.** Tem os atributos (nome, vida, dano dos golpes...), o construtor e os métodos (`socar`, `chutar`, `golpeEspecial`, `defender`, `mostrarBarra`, `mostrarFicha`). |
+| `Lutador` | **O personagem.** Tem os atributos (nome, vida, dano dos golpes...), o construtor e os métodos (`socar`, `chutar`, `golpeEspecial`, `defender`, `mostrarFicha`). |
 | `Jogo` | **O jogo.** Mostra o menu, deixa escolher o personagem e controla os rounds e as vezes de cada jogador. |
 | `App` | Classe principal com o `main`. Só cria o objeto `Jogo` e manda ele abrir o menu. |
 
@@ -63,7 +62,6 @@ dos exercícios de aula.
 |---|---|
 | `socar`, `chutar`, `golpeEspecial` | Os três golpes. Cada um recebe o adversário como parâmetro e tira a vida dele com `inimigo.vida = inimigo.vida - dano`, igual ao `atacarOutroPersonagem` da aula. |
 | `defender` | Levanta a guarda: deixa o atributo `defendendo` como `true`. Quem atacar olha esse atributo e tira só metade do dano. |
-| `mostrarBarra` | Desenha a barra de vida com um `for` de 20 voltas. |
 | `mostrarFicha` | Mostra todos os dados do lutador, igual ao `pokedex()` do exercício do Pokémon. |
 
 **Na classe `Jogo`:**
@@ -123,12 +121,10 @@ Não tem biblioteca nenhuma, é tudo `System.out.println`:
   uma vez só quando o jogo abre.
 - As **molduras** são `System.out.println` com `=` e `-`, escritos no lugar
   onde a mensagem aparece.
-- A **barra de vida** é desenhada com um `for` que roda 20 vezes no método
-  `mostrarBarra`. Cada volta escreve um `#` se aquele pedaço ainda tem vida,
-  ou um `.` se não tem. Como a vida vai de 0 a 100, basta dividir por 5 para
-  saber quantos `#` desenhar. O nome fica numa linha e a barra na linha de
-  baixo, e é por isso que as barras dos dois lutadores sempre começam na mesma
-  coluna, sem precisar acertar espaço nenhum.
+- A **vida dos dois lutadores** aparece no começo de cada turno, em dois
+  `System.out.println` escritos dentro do `jogarRound`, no formato
+  `Zangief - 55 de vida`. Não existe método para isso: é a linha escrita no
+  lugar onde ela aparece, igual às molduras.
 
 ## Conceitos de POO usados (para explicar na apresentação)
 
@@ -150,7 +146,7 @@ Não tem biblioteca nenhuma, é tudo `System.out.println`:
   atributo daquele objeto, e não de uma variável qualquer.
 - **Objeto criado na hora**: o `escolherLutador` usa `new Lutador(...)` toda vez
   que alguém escolhe. É por isso que os dois jogadores podem pegar o mesmo
-  personagem sem dividirem a mesma barra de vida — são dois objetos diferentes.
+  personagem sem dividirem a mesma vida — são dois objetos diferentes.
 - **Um método chamando outro**: o `iniciarBatalha` tem um `while` que conta os
   rounds (`while (lutador1.roundsVencidos < 2 && ...)`) e, a cada volta, chama
   o `jogarRound`. Dentro do `jogarRound` tem outro `while`, que conta os turnos,
