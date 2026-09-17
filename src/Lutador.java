@@ -9,8 +9,7 @@ public class Lutador {
     int danoSoco;
     int danoChute;
     int danoEspecial;
-    int roundsVencidos;
-    boolean defendendo; // quando esta com a guarda levantada, sofre metade do dano
+    boolean defendendo; // true quando o lutador esta de guarda levantada
 
     // Construtor
     public Lutador(String nome, String pais, String estilo, String especial, int danoSoco, int danoChute, int danoEspecial) {
@@ -22,15 +21,14 @@ public class Lutador {
         this.danoChute = danoChute;
         this.danoEspecial = danoEspecial;
         this.vida = 100; // todo lutador comeca a luta com 100 de vida
-        this.roundsVencidos = 0;
         this.defendendo = false;
     }
 
     // Metodos
 
-    // Tira a vida do inimigo, do mesmo jeito que a aula fazia com inimigo.vida = inimigo.vida - 10
+    // Tira vida do inimigo, igual ao atacarOutroPersonagem da aula
     void socar(Lutador inimigo) {
-        int dano = this.danoSoco;
+        int dano = danoSoco;
 
         // se o inimigo levantou a guarda, o golpe tira so a metade
         if (inimigo.defendendo) {
@@ -44,12 +42,12 @@ public class Lutador {
             inimigo.vida = 0;
         }
 
-        System.out.println("   " + this.nome + " deu um SOCO e tirou " + dano + " de vida de " + inimigo.nome + ".");
+        System.out.println("   " + nome + " deu um SOCO e tirou " + dano + " de vida de " + inimigo.nome);
     }
 
-    // O chute e igual ao soco, so que usa o dano do chute, que e maior
+    // Igual ao soco, mas usando o dano do chute, que e maior
     void chutar(Lutador inimigo) {
-        int dano = this.danoChute;
+        int dano = danoChute;
 
         if (inimigo.defendendo) {
             dano = dano / 2;
@@ -61,36 +59,40 @@ public class Lutador {
             inimigo.vida = 0;
         }
 
-        System.out.println("   " + this.nome + " deu um CHUTE e tirou " + dano + " de vida de " + inimigo.nome + ".");
+        System.out.println("   " + nome + " deu um CHUTE e tirou " + dano + " de vida de " + inimigo.nome);
     }
 
-    // O golpe especial e o mais forte e passa por cima da guarda
+    // O golpe mais forte. So pode ser usado quando a vida esta em 50 ou menos
     void golpeEspecial(Lutador inimigo) {
-        inimigo.vida = inimigo.vida - this.danoEspecial;
+        if (vida <= 50) {
+            inimigo.vida = inimigo.vida - danoEspecial;
 
-        if (inimigo.vida < 0) {
-            inimigo.vida = 0;
+            if (inimigo.vida < 0) {
+                inimigo.vida = 0;
+            }
+
+            System.out.println("   " + nome + " usou " + especial + " e tirou " + danoEspecial + " de vida de " + inimigo.nome);
+        } else {
+            System.out.println("   " + nome + " ainda tem vida demais para usar o especial e perdeu a vez");
         }
-
-        System.out.println("   " + this.nome + " usou " + this.especial + "!");
-        System.out.println("   O golpe passou pela guarda e tirou " + this.danoEspecial + " de vida de " + inimigo.nome + ".");
     }
 
     // Levanta a guarda. Quem ataca olha este atributo para saber se o dano cai pela metade
     void defender() {
-        this.defendendo = true;
-        System.out.println("   " + this.nome + " levantou a guarda e vai sofrer metade do dano.");
+        defendendo = true;
+        System.out.println("   " + nome + " levantou a guarda e vai sofrer metade do dano");
     }
 
     // Mostra os dados do lutador, igual ao pokedex() do exercicio do Pokemon
-    void mostrarFicha() {
-        System.out.println("   Nome ......: " + this.nome);
-        System.out.println("   Pais ......: " + this.pais);
-        System.out.println("   Estilo ....: " + this.estilo);
-        System.out.println("   Especial ..: " + this.especial);
-        System.out.println("   Soco ......: " + this.danoSoco);
-        System.out.println("   Chute .....: " + this.danoChute);
-        System.out.println("   Dano esp ..: " + this.danoEspecial);
-        System.out.println("   Vida ......: " + this.vida);
+    void ficha() {
+        System.out.println("   Nome: " + nome);
+        System.out.println("   Pais: " + pais);
+        System.out.println("   Estilo: " + estilo);
+        System.out.println("   Especial: " + especial);
+        System.out.println("   Soco: " + danoSoco);
+        System.out.println("   Chute: " + danoChute);
+        System.out.println("   Dano do especial: " + danoEspecial);
+        System.out.println("   Vida: " + vida);
+        System.out.println();
     }
 }

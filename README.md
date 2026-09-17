@@ -1,13 +1,13 @@
 # Jogo de Luta em Java — projeto de POO
 
 Jogo de luta estilo Street Fighter que roda no terminal. **Dois jogadores no
-mesmo teclado** escolhem um lutador cada e se enfrentam em uma luta de
-**melhor de 3 rounds**: cada lutador começa o round com 100 de vida e vence a
-luta quem ganhar 2 rounds.
+mesmo teclado** escolhem um lutador cada e trocam golpes até a vida de um
+deles chegar a zero.
 
 O projeto usa só o que foi visto em aula: **atributos, construtor, métodos,
-`this`, `if`, `while` e um objeto recebendo outro objeto como parâmetro**. Não tem nada além disso — sem biblioteca, sem sorteio, sem
-tratamento de erro e sem truque de terminal.
+`this`, `if`, `while`, `Scanner` e um objeto recebendo outro objeto como
+parâmetro**. Não tem nada além disso — sem herança, sem lista, sem sorteio,
+sem tratamento de erro e sem biblioteca.
 
 ## Como rodar
 
@@ -21,109 +21,97 @@ javac -d bin src/*.java
 java -cp bin App
 ```
 
-A tela usa só caracteres comuns do teclado (`-`, `=`, `[`, `]`),
-então fica igual em qualquer terminal: `cmd`, PowerShell, VS Code ou IntelliJ.
+A tela usa só caracteres comuns do teclado (`-`, `=`, `[`, `]`), então fica
+igual em qualquer terminal: `cmd`, PowerShell, VS Code ou IntelliJ.
 
-## As classes do projeto
+## As duas classes do projeto
 
-Cada classe é uma "coisa" do jogo, do mesmo jeito que `Pokemon` e `Pessoa`
-eram nos exercícios da aula.
+A divisão é a mesma dos exercícios de aula: uma classe guarda o objeto e os
+métodos dele, e o `App` com o `main` executa tudo.
 
 | Classe | O que ela é |
 |---|---|
-| `Lutador` | **O personagem.** Tem os atributos (nome, vida, dano dos golpes...), o construtor e os métodos (`socar`, `chutar`, `golpeEspecial`, `defender`, `mostrarFicha`). |
-| `Jogo` | **O jogo.** Mostra o menu, deixa escolher o personagem e controla os rounds e as vezes de cada jogador. |
-| `App` | Classe principal com o `main`. Só cria o objeto `Jogo` e manda ele abrir o menu. |
+| `Lutador` | **O personagem**, igual ao `Pokemon` e ao `Personagem` da aula. Tem os atributos, o construtor e os métodos (`socar`, `chutar`, `golpeEspecial`, `defender`, `ficha`). |
+| `App` | A classe com o `main`. Cria os lutadores com `new`, mostra o menu e controla a luta. |
 
-O `App` ficou igual ao das aulas: cria um objeto e chama um método dele.
+Os quatro lutadores são criados no começo do `main`, do mesmo jeito que o
+exercício do Pokémon criava o Snorlax, o Pikachu e o Blastoise:
 
 ```java
-public class App {
-    public static void main(String[] args) {
-
-        Jogo jogo = new Jogo();
-        jogo.abrirMenu();
-
-    }
-}
+Lutador ryu = new Lutador("Ryu", "Japao", "Karate", "Hadouken", 14, 22, 45);
+Lutador chunLi = new Lutador("Chun-Li", "China", "Kung Fu", "Spinning Bird Kick", 13, 20, 42);
+Lutador blanka = new Lutador("Blanka", "Brasil", "Selvagem", "Electric Thunder", 17, 26, 50);
+Lutador zangief = new Lutador("Zangief", "Russia", "Luta Livre", "Spinning Piledriver", 19, 30, 55);
 ```
 
-## Os métodos
+Como são sempre esses mesmos quatro objetos, cada jogador escolhe um deles
+pelo número e a variável `jogador1` (ou `jogador2`) passa a apontar para o
+objeto escolhido.
 
-O projeto tem poucos métodos de propósito: só existe método para o que tem
-lógica própria (um laço, uma conta, uma decisão) e é usado em mais de um lugar.
-As mensagens de tela são `System.out.println` escritos no meio do código que
-faz o trabalho, igual aos `System.out.println("=========== Dados iniciais ===========")`
-dos exercícios de aula.
-
-**Na classe `Lutador`:**
+## Os métodos do `Lutador`
 
 | Método | O que faz |
 |---|---|
-| `socar`, `chutar`, `golpeEspecial` | Os três golpes. Cada um recebe o adversário como parâmetro e tira a vida dele com `inimigo.vida = inimigo.vida - dano`, igual ao `atacarOutroPersonagem` da aula. |
+| `socar` | Recebe o adversário como parâmetro e tira a vida dele com `inimigo.vida = inimigo.vida - dano`, igual ao `atacarOutroPersonagem` da aula. Dano menor. |
+| `chutar` | Igual ao soco, mas usando o dano do chute, que é maior. |
+| `golpeEspecial` | O golpe mais forte e o único que passa por cima da guarda. Só funciona quando o lutador está com **50 de vida ou menos**; acima disso ele perde a vez. |
 | `defender` | Levanta a guarda: deixa o atributo `defendendo` como `true`. Quem atacar olha esse atributo e tira só metade do dano. |
-| `mostrarFicha` | Mostra todos os dados do lutador, igual ao `pokedex()` do exercício do Pokémon. |
+| `ficha` | Mostra todos os dados do lutador, igual ao `pokedex()` do exercício do Pokémon. |
 
-**Na classe `Jogo`:**
-
-| Método | O que faz |
-|---|---|
-| `abrirMenu` | O `while` do menu principal, com a abertura desenhada e as três opções. |
-| `escolherLutador` | Mostra a lista, pede um número de 1 a 6 repetindo enquanto for inválido, e devolve o `Lutador` criado com `new`. É usado três vezes (jogador 1, jogador 2 e a tela de ficha). |
-| `iniciarBatalha` | A luta inteira: apresenta os dois lutadores, e um `while` chama um round atrás do outro até alguém vencer 2. No fim mostra quem ganhou. |
-| `jogarRound` | Um round só: devolve os dois para 100 de vida e roda o `while` dos turnos até a vida de um deles chegar a zero. No fim conta o round para quem sobrou de pé. |
-| `jogarVez` | A vez de um lutador: mostra as quatro ações, pede uma (repetindo enquanto for inválida) e executa a escolhida. |
+Todo o resto (menu, escolha dos lutadores, laço da luta) está escrito direto
+no `main`, junto dos `System.out.println` das molduras — do mesmo jeito que o
+`App` das aulas escrevia `System.out.println("=========== Dados iniciais ===========")`
+no meio do código.
 
 ## Regras da luta
 
-A luta é **melhor de 3 rounds**. Cada round começa com os dois lutadores em
-**100 de vida** e acaba quando a vida de um deles chega a zero. Quem vencer 2
-rounds ganha a luta. O jogador 1 sempre joga primeiro no turno.
-
-No seu turno você escolhe uma ação:
+Os dois lutadores começam com **100 de vida** e a luta acaba quando a vida de
+um deles chega a zero. O jogador 1 sempre joga primeiro no turno.
 
 | Ação | Efeito |
 |---|---|
 | **Soco** | Dano menor. |
 | **Chute** | Dano maior que o soco. |
-| **Defender** | Não causa dano: o lutador levanta a guarda e o próximo golpe que ele receber tira metade. |
-| **Especial** | O golpe mais forte, e ele **passa por cima da guarda**. |
+| **Defender** | Não causa dano: levanta a guarda, e o próximo golpe recebido tira metade. |
+| **Especial** | O golpe mais forte, passa por cima da guarda, mas só com 50 de vida ou menos. |
 
 Outros detalhes:
 
 - **Nada é sorteado.** O dano de cada golpe já vem definido no construtor do
   lutador, então o mesmo golpe sempre tira o mesmo tanto de vida.
-- A guarda levantada vale só até aquele lutador jogar de novo: a primeira linha
-  do `jogarVez` é `atacante.defendendo = false`.
-- Se você digitar um número que não existe, o jogo pede de novo em vez de
-  passar a vez.
+- A guarda levantada vale só até aquele lutador jogar de novo: antes da vez
+  dele o jogo faz `jogador1.defendendo = false`.
+- Os dois jogadores não podem escolher o mesmo lutador. Como o jogo usa sempre
+  os mesmos quatro objetos, escolher o mesmo número duas vezes faria um objeto
+  lutar contra ele mesmo, dividindo a mesma barra de vida.
 - A vida nunca fica negativa: quando passa de zero, ela é acertada para zero.
-- No começo de cada round os dois voltam com a vida cheia e a guarda baixada,
-  mas os rounds já vencidos continuam contados.
+- No fim da luta os dois voltam para 100 de vida, para o próximo que escolher
+  aquele lutador começar do zero.
+- Se você digitar um número de ação que não existe, o lutador perde a vez.
 
 ## Os lutadores
 
 | # | Nome | País | Estilo | Soco | Chute | Especial | Golpe |
 |---|---|---|---|---|---|---|---|
 | 1 | Ryu | Japão | Karate | 14 | 22 | 45 | Hadouken |
-| 2 | Ken | EUA | Karate | 16 | 24 | 48 | Shoryuken |
-| 3 | Chun-Li | China | Kung Fu | 13 | 20 | 42 | Spinning Bird Kick |
-| 4 | Blanka | Brasil | Selvagem | 17 | 26 | 50 | Electric Thunder |
-| 5 | Zangief | Rússia | Luta Livre | 19 | 30 | 55 | Spinning Piledriver |
-| 6 | Dhalsim | Índia | Yoga | 14 | 23 | 46 | Yoga Flame |
+| 2 | Chun-Li | China | Kung Fu | 13 | 20 | 42 | Spinning Bird Kick |
+| 3 | Blanka | Brasil | Selvagem | 17 | 26 | 50 | Electric Thunder |
+| 4 | Zangief | Rússia | Luta Livre | 19 | 30 | 55 | Spinning Piledriver |
+
+O Zangief bate mais forte, mas quem apanha primeiro chega antes nos 50 de
+vida e libera o golpe especial — é o que dá a chance de virada.
 
 ## Como é feito o visual do terminal
 
 Não tem biblioteca nenhuma, é tudo `System.out.println`:
 
 - O nome **STREET FIGHTER** é desenhado com as próprias letras, uma linha de
-  `println` por vez, no começo do `abrirMenu` — antes do `while`, para aparecer
-  uma vez só quando o jogo abre.
+  `println` por vez, no começo do `main` — antes do `while` do menu, para
+  aparecer uma vez só quando o jogo abre.
 - As **molduras** são `System.out.println` com `=` e `-`, escritos no lugar
   onde a mensagem aparece.
-- A **vida dos dois lutadores** aparece no começo de cada turno, em dois
-  `System.out.println` escritos dentro do `jogarRound`, no formato
-  `Zangief - 55 de vida`. Não existe método para isso: é a linha escrita no
+- A **vida dos dois lutadores** aparece no começo de cada turno, no formato
+  `Zangief: 55 de vida`. Não existe método para isso: é a linha escrita no
   lugar onde ela aparece, igual às molduras.
 
 ## Conceitos de POO usados (para explicar na apresentação)
@@ -133,35 +121,28 @@ Não tem biblioteca nenhuma, é tudo `System.out.println`:
 - **Atributos**: as características de cada objeto (`nome`, `vida`, `danoSoco`...),
   todos de tipo simples (`String`, `int`, `boolean`).
 - **Construtor**: `public Lutador(...)` define como um lutador nasce. Todo
-  lutador já começa com 100 de vida e com zero round vencido, isso está escrito
+  lutador já começa com 100 de vida e com a guarda baixada, isso está escrito
   no construtor. É lá também que entra o dano dos golpes de cada personagem.
-- **Métodos**: as ações do objeto (`socar`, `chutar`, `defender`, `mostrarFicha`).
-- **Um objeto agindo sobre outro**: `ryu.socar(ken)` — o método recebe outro
-  `Lutador` como parâmetro e mexe na vida dele, igualzinho ao exercício do
-  `atacarOutroPersonagem`.
+- **Métodos**: as ações do objeto (`socar`, `chutar`, `defender`, `ficha`).
+- **Um objeto agindo sobre outro**: `ryu.socar(zangief)` — o método recebe
+  outro `Lutador` como parâmetro e mexe na vida dele, igualzinho ao exercício
+  do `atacarOutroPersonagem`.
 - **Mexer no atributo de outro objeto**: dentro do `socar` o jogo faz
   `inimigo.vida = inimigo.vida - dano;`, do mesmo jeito que a aula fazia
   `inimigo.vida = inimigo.vida - 10;`.
-- **`this`**: usado dentro da classe para deixar claro que estamos falando do
-  atributo daquele objeto, e não de uma variável qualquer.
-- **Objeto criado na hora**: o `escolherLutador` usa `new Lutador(...)` toda vez
-  que alguém escolhe. É por isso que os dois jogadores podem pegar o mesmo
-  personagem sem dividirem a mesma vida — são dois objetos diferentes.
-- **Um método chamando outro**: o `iniciarBatalha` tem um `while` que conta os
-  rounds (`while (lutador1.roundsVencidos < 2 && ...)`) e, a cada volta, chama
-  o `jogarRound`. Dentro do `jogarRound` tem outro `while`, que conta os turnos,
-  e ele chama o `jogarVez` uma vez para cada jogador. Assim cada `while` fica
-  num método só e dá para ler um de cada vez, em vez de três laços empilhados
-  no mesmo lugar.
-- **Método que devolve valor**: quase todos os métodos são `void`, mas o
-  `escolherLutador` devolve um `Lutador`. Serve para mostrar a diferença entre
-  um método que só faz uma coisa e um que entrega um valor de volta.
+- **`this`**: usado no construtor para diferenciar o atributo do objeto do
+  parâmetro que chegou com o mesmo nome.
+- **Duas variáveis apontando para o mesmo objeto**: `jogador1 = ryu` não cria
+  um Ryu novo — as duas variáveis passam a ser o mesmo lutador. É por isso que
+  os dois jogadores não podem escolher o mesmo número.
+- **`Scanner`**: a leitura do teclado com `scanner.nextInt()`, igual ao
+  primeiro exercício da aula.
 
 ## Ideias para aumentar o projeto depois
 
-- Mais lutadores (acrescentar um `else if` no `escolherLutador` e uma linha na
-  lista).
-- Limitar o golpe especial a um uso por round, com um atributo `int` contando
+- Mais lutadores (criar outro objeto no começo do `main` e acrescentar um
+  `else if` na escolha).
+- Voltar a luta para melhor de 3 rounds, com um atributo `int roundsVencidos`.
+- Limitar o golpe especial a um uso por luta, com um atributo `int` contando
   quantas vezes já foi usado.
-- Um atributo `velocidade` para decidir quem ataca primeiro no turno.
 - Um atributo `defesa` descontado do dano dos golpes normais.
