@@ -1,5 +1,6 @@
-
 public class Lutador {
+
+    // Atributos
     String nome;
     String pais;
     String estilo;
@@ -8,75 +9,75 @@ public class Lutador {
     int danoSoco;
     int danoChute;
     int danoEspecial;
-    boolean defendendo; // true quando o lutador esta de guarda levantada
+    boolean defendendo;
 
-    // método construtor
+    // Construtor
     public Lutador(String nome, String pais, String estilo, String especial, int danoSoco, int danoChute, int danoEspecial) {
+
         this.nome = nome;
         this.pais = pais;
         this.estilo = estilo;
         this.especial = especial;
+        this.vida = 100;
         this.danoSoco = danoSoco;
         this.danoChute = danoChute;
         this.danoEspecial = danoEspecial;
-        this.vida = 100;
         this.defendendo = false;
     }
 
-    // métodos
+    // Métodos
+
     void socar(Lutador inimigo) {
-        // se o inimigo estiver defendendo, o dano é reduzido pela metade
+
         if (inimigo.defendendo) {
             inimigo.vida = inimigo.vida - danoSoco/2;
-            System.out.println(" " + nome + " deu um SOCO e tirou " + danoSoco/2 + " de vida de " + inimigo.nome);
         } else {
             inimigo.vida = inimigo.vida - danoSoco;
-            System.out.println(" " + nome + " deu um SOCO e tirou " + danoSoco + " de vida de " + inimigo.nome);
         }
-        if (inimigo.vida < 0) {
-            inimigo.vida = 0;
-        }
+
+        System.out.println(nome + " deu um SOCO em " + inimigo.nome);
     }
 
     void chutar(Lutador inimigo) {
+
         if (inimigo.defendendo) {
-            inimigo.vida = inimigo.vida - danoChute / 2;
-            System.out.println(" " + nome + " deu um CHUTE e tirou " + danoChute/2 + " de vida de " + inimigo.nome);
+            inimigo.vida = inimigo.vida - danoChute/2;
         } else {
             inimigo.vida = inimigo.vida - danoChute;
-            System.out.println(" " + nome + " deu um CHUTE e tirou " + danoChute + " de vida de " + inimigo.nome);
         }
-        if (inimigo.vida < 0) {
-            inimigo.vida = 0;
-        }
+
+        System.out.println(nome + " deu um CHUTE em " + inimigo.nome);
     }
 
     void golpeEspecial(Lutador inimigo) {
+
         if (inimigo.defendendo) {
             inimigo.vida = inimigo.vida - danoEspecial/2;
-            System.out.println(" " + nome + " deu um GOLPE ESPECIAL e tirou " + danoEspecial/2 + " de vida de " + inimigo.nome);
         } else {
             inimigo.vida = inimigo.vida - danoEspecial;
-            System.out.println(" " + nome + " deu um GOLPE ESPECIAL e tirou " + danoEspecial + " de vida de " + inimigo.nome);
         }
-        if (inimigo.vida < 0) {
-            inimigo.vida = 0;
-        }
+
+        System.out.println(nome + " usou " + especial + "!");
     }
 
     void defender() {
+
         defendendo = true;
-        System.out.println(" " + nome + " esta defendendo");
+
+        System.out.println(nome + " está defendendo!");
     }
 
     void info() {
+
+        System.out.println("------------------------------");
         System.out.println("Nome: " + nome);
-        System.out.println("Pais: " + pais);
+        System.out.println("País: " + pais);
         System.out.println("Estilo: " + estilo);
         System.out.println("Especial: " + especial);
         System.out.println("Vida: " + vida);
-        System.out.println("Dano do Soco: " + danoSoco);
-        System.out.println("Dano do Chute: " + danoChute);
-        System.out.println("Dano do Especial: " + danoEspecial);
+        System.out.println("Dano do soco: " + danoSoco);
+        System.out.println("Dano do chute: " + danoChute);
+        System.out.println("Dano especial: " + danoEspecial);
+        System.out.println("------------------------------");
     }
 }
