@@ -17,7 +17,7 @@ public class App {
 
             System.out.println();
             System.out.println("================================");
-            System.out.println("       STREET FIGHTER - JAVA POO");
+            System.out.println("   STREET FIGHTER - JAVA POO");
             System.out.println("================================");
             System.out.println("[1] Lutar");
             System.out.println("[2] Ver ficha dos lutadores");
